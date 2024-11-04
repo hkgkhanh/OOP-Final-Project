@@ -1,0 +1,23 @@
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class HospitalApp {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Ứng dụng Bệnh viện");
+//        JButton button = new JButton("Kết nối CSDL");
+//        
+//        button.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                DatabaseConnection.connect();
+//            }
+//        });
+//
+//        frame.add(button);
+//        frame.setSize(300, 200);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setVisible(true);
+        DatabaseConnection.connect();
+    }
+}

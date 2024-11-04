@@ -1,0 +1,57 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+public class HospitalApp {
+	
+	// Ví dụ về bảng hiển thị bệnh nhân
+	public static void showPatientList() {
+	    String[] columns = {"ID", "Tên", "Tuổi", "Giới tính"};
+	    Object[][] data = {
+	        {1, "Nguyễn Văn A", 30, "Nam"},
+	        {2, "Trần Thị B", 25, "Nữ"}
+	    };
+	    JTable table = new JTable(data, columns);
+	    JScrollPane scrollPane = new JScrollPane(table);
+	    JFrame tableFrame = new JFrame("Danh sách Bệnh nhân");
+	    tableFrame.add(scrollPane);
+	    tableFrame.setSize(500, 300);
+	    tableFrame.setVisible(true);
+	}
+	
+	public static void main(String[] args) {
+        JFrame frame = new JFrame("Phần mềm Quản lý Bệnh viện");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        
+        // Kết nối đến DB
+        DatabaseConnection.connect();
+
+        // Navbar
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menuPatient = new JMenu("Bệnh nhân");
+        JMenu menuDoctor = new JMenu("Bác sĩ");
+        menuBar.add(menuPatient);
+        menuBar.add(menuDoctor);
+        frame.setJMenuBar(menuBar);
+        
+        menuPatient.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                showPatientList();
+            }
+        });
+
+        // Banner
+        ImageIcon bannerIcon = new ImageIcon("C:/Users/NONG QUOC KHANH/Pictures/Screenshots/deep thought.png"); // Thay đổi đường dẫn
+        JLabel bannerLabel = new JLabel(bannerIcon);
+        frame.add(bannerLabel, BorderLayout.NORTH);
+
+        // Nội dung chính
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+        frame.add(mainPanel, BorderLayout.CENTER);
+
+        frame.setVisible(true);
+    }
+}
