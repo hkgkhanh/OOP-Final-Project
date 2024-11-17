@@ -1,0 +1,33 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+
+public class Patient {
+    private String cccd;
+    private String surname;
+    private String firstname;
+    private String gender;
+    private String dateOfBirth;
+    private String address;
+    private String phoneNumber;
+    private ArrayList<MedicalRecord> medicalRecords;
+    
+	public Patient(String cccd, String surname, String firstname, String gender, String dateOfBirth, String address, String phoneNumber) {
+		super();
+		this.cccd = cccd;
+		this.surname = surname;
+		this.firstname = firstname;
+		this.gender = gender;
+		this.dateOfBirth = dateOfBirth;
+		this.address = address;
+		this.phoneNumber = phoneNumber;
+	}
+
+    
+}

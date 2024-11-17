@@ -6,21 +6,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 
 public class Doctor {
     private int id;
-    private String name;
-    private String address;
-    private String contact_no;
-    private String date_joining;
+    private String password;
+    private String surname;
+    private String firstname;
+    private String faculty;
+    private String phoneNumber;
+    private String email;
+    private String joindate;
+    private ArrayList<Patient> patients;
     
-	public Doctor(int id, String name, String address, String contact_no, String date_joining) {
+	public Doctor(int id, String password, String surname, String firstname, String faculty, String phoneNumber, String email, String joindate) {
 		super();
 		this.id = id;
-		this.name = name;
-		this.address = address;
-		this.contact_no = contact_no;
-		this.date_joining = date_joining;
+		this.password = password;
+		this.surname = surname;
+		this.firstname = firstname;
+		this.faculty = faculty;
+		this.phoneNumber = phoneNumber;
+		this.email = email;
+		this.joindate = joindate;
 	}
 
 	public int getId() {
@@ -31,38 +39,67 @@ public class Doctor {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getAddress() {
-		return address;
+	public String getSurname() {
+		return surname;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setSurname(String surname) {
+		this.surname = surname;
 	}
 
-	public String getContact_no() {
-		return contact_no;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public void setContact_no(String contact_no) {
-		this.contact_no = contact_no;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
-	public String getDate_joining() {
-		return date_joining;
+	public String getFaculty() {
+		return faculty;
 	}
 
-	public void setDate_joining(String date_joining) {
-		this.date_joining = date_joining;
+	public void setFaculty(String faculty) {
+		this.faculty = faculty;
 	}
-    
-	
-    
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getJoindate() {
+		return joindate;
+	}
+
+	public void setJoindate(String joindate) {
+		this.joindate = joindate;
+	}
+
+	public ArrayList<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(ArrayList<Patient> patients) {
+		this.patients = patients;
+	} 
 }

@@ -55,7 +55,7 @@ public class Admin {
                     loginFrame.dispose(); // Close login window
                     showAdminDashboard(); // Open new window if login successful
                 } else {
-                    JOptionPane.showMessageDialog(loginFrame, "Nhập login id hoặc mật khẩu sai, hãy thử lại.");
+                    JOptionPane.showMessageDialog(loginFrame, "Nhập admin ID hoặc mật khẩu sai, hãy thử lại.");
                 }
             }
         });
@@ -69,7 +69,7 @@ public class Admin {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
-            String sql = "SELECT * FROM admin WHERE login_id = ? AND password = ?";
+            String sql = "SELECT * FROM admin WHERE loginID = ? AND password = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, login_id);
             stmt.setString(2, password);
@@ -112,15 +112,15 @@ public class Admin {
         dashboardFrame.setLayout(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns
 
         // Panel for Patient Management
-        JPanel patientPanel = createManagementPanel("Bệnh nhân", "patients");
+        JPanel patientPanel = createManagementPanel("Bệnh nhân", "patient");
         // Panel for Doctor Management
-        JPanel doctorPanel = createManagementPanel("Bác sĩ", "doctors");
+        JPanel doctorPanel = createManagementPanel("Bác sĩ", "doctor");
         // Panel for Room Management (no count)
-        JPanel roomPanel = createManagementPanel("Phòng", "room");
+        JPanel recordPanel = createManagementPanel("Hồ sơ bệnh án", "medicalrecord");
 
         dashboardFrame.add(patientPanel);
         dashboardFrame.add(doctorPanel);
-        dashboardFrame.add(roomPanel);
+        dashboardFrame.add(recordPanel);
         
         dashboardFrame.setLocationRelativeTo(null); // Center the window
         dashboardFrame.setVisible(true);
@@ -216,6 +216,19 @@ public class Admin {
 
         	// Add to main dashboard
         	panel.add(scrollableDoctorsListPane);
+        	
+        } else if (title.equals("Hồ sơ bệnh án")) {
+        	// Inside showAdminDashboard or createManagementPanel
+        	JPanel recordListPanel = new JPanel();
+        	recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
+//        	displayRecords(recordListPanel); // Populate with patient records
+        	
+        	// Wrap the patientListPanel in a JScrollPane
+        	JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
+        	scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        	// Add to main dashboard
+        	panel.add(scrollableRecordsListPane);
         }
 
         return panel;
@@ -243,20 +256,21 @@ public class Admin {
     
     private List<Patient> getPatientData() {
         List<Patient> patients = new ArrayList<>();
-        String query = "SELECT * FROM patients";
+        String query = "SELECT * FROM patient";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int id = rs.getInt("patient_id");
-                String name = rs.getString("patient_name");
-                String fathers_name = rs.getString("fathers_name");
+                String cccd = rs.getString("cccd");
+                String firstname = rs.getString("firstname");
+                String surname = rs.getString("surname");
+                String gender = rs.getString("gender");
+                String dateOfBirth = rs.getString("dateOfBirth");
                 String address = rs.getString("address");
-                String contact_no = rs.getString("contact_no");
-                int age = rs.getInt("age");
-                patients.add(new Patient(id, name, fathers_name, address, contact_no, age));
+                String phoneNumber = rs.getString("phoneNumber");
+                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -273,7 +287,7 @@ public class Admin {
         for (Patient patient : patients) {
             JPanel patientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             
-            JLabel nameLabel = new JLabel(patient.getName());
+            JLabel nameLabel = new JLabel(patient.getSurname() + " " + patient.getFirstname());
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
@@ -307,19 +321,22 @@ public class Admin {
 
     private List<Doctor> getDoctorData() {
         List<Doctor> doctors = new ArrayList<>();
-        String query = "SELECT * FROM doctors";
+        String query = "SELECT * FROM doctor";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int id = rs.getInt("doctor_id");
-                String name = rs.getString("doctor_name");
-                String address = rs.getString("address");
-                String contact_no = rs.getString("contact_no");
-                String date_joining = rs.getString("date_joining");
-                doctors.add(new Doctor(id, name, address, contact_no, date_joining));
+                int id = rs.getInt("doctorID");
+                String password = rs.getString("password");
+                String firstname = rs.getString("firstname");
+                String surname = rs.getString("surname");
+                String faculty = rs.getString("faculty");
+                String email = rs.getString("email");
+                String phoneNumber = rs.getString("phoneNumber");
+                String joindate = rs.getString("joinDate");
+                doctors.add(new Doctor(id, password, surname, firstname, faculty, phoneNumber, email, joindate));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -336,7 +353,7 @@ public class Admin {
         for (Doctor doctor : doctors) {
             JPanel doctorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             
-            JLabel nameLabel = new JLabel(doctor.getName());
+            JLabel nameLabel = new JLabel(doctor.getSurname() + " " + doctor.getFirstname());
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
@@ -361,6 +378,67 @@ public class Admin {
 
             // Add patient panel to main panel
             panel.add(doctorPanel);
+        }
+
+        panel.revalidate();
+        panel.repaint();
+    }
+    
+    private List<MedicalRecord> getRecordData() {
+        List<MedicalRecord> records = new ArrayList<>();
+        String query = "SELECT * FROM medicalrecord";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("recordID");
+                String cccd = rs.getString("cccd");
+                int doctorID = rs.getInt("doctorID");
+                String dateOfVisit = rs.getString("dateOfVisit");
+                records.add(new MedicalRecord(id, cccd, doctorID, dateOfVisit));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+
+        return records;
+    }
+
+    private void displayRecords(JPanel panel) {
+        panel.removeAll(); // Clear any existing content
+
+        List<MedicalRecord> records = getRecordData();
+        for (MedicalRecord record : records) {
+            JPanel recordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            
+            JLabel nameLabel = new JLabel(record.getCccd());
+            JButton editButton = new JButton("Sửa");
+            JButton deleteButton = new JButton("Xóa");
+
+            // Set button action listeners
+            editButton.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+//                    editPatient(patient); // Define this method to edit patient data
+                }
+            });
+
+            deleteButton.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+//                    deletePatient(patient.getId()); // Define this method to delete patient
+                    displayRecords(panel); // Refresh display after deletion
+                }
+            });
+
+            // Add components to the patient panel
+            recordPanel.add(nameLabel);
+            recordPanel.add(editButton);
+            recordPanel.add(deleteButton);
+
+            // Add patient panel to main panel
+            panel.add(recordPanel);
         }
 
         panel.revalidate();

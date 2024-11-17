@@ -6,46 +6,59 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 
 public class Patient {
-    private int id;
-    private String name;
-    private String fathers_name;
+    private String cccd;
+    private String surname;
+    private String firstname;
+    private String gender;
+    private String dateOfBirth;
     private String address;
-    private String contact_no;
-    private int age;
-
-    public Patient(int id, String name, String fathers_name, String address, String contact_no, int age) {
-        this.id = id;
-        this.name = name;
-        this.fathers_name = fathers_name;
-        this.address = address;
-        this.contact_no = contact_no;
-        this.age = age;
-    }
-
-	public int getId() {
-		return id;
+    private String phoneNumber;
+    private ArrayList<MedicalRecord> medicalRecords;
+    
+	public Patient(String cccd, String surname, String firstname, String gender, String dateOfBirth, String address, String phoneNumber) {
+		super();
+		this.cccd = cccd;
+		this.surname = surname;
+		this.firstname = firstname;
+		this.gender = gender;
+		this.dateOfBirth = dateOfBirth;
+		this.address = address;
+		this.phoneNumber = phoneNumber;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public String getSurname() {
+		return surname;
 	}
 
-	public String getName() {
-		return name;
+	public void setSurname(String surname) {
+		this.surname = surname;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public String getFirstname() {
+		return firstname;
 	}
 
-	public String getFathers_name() {
-		return fathers_name;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 
-	public void setFathers_name(String fathers_name) {
-		this.fathers_name = fathers_name;
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(String dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
 	}
 
 	public String getAddress() {
@@ -56,21 +69,23 @@ public class Patient {
 		this.address = address;
 	}
 
-	public String getContact_no() {
-		return contact_no;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 
-	public void setContact_no(String contact_no) {
-		this.contact_no = contact_no;
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
-	public int getAge() {
-		return age;
+	public ArrayList<MedicalRecord> getMedicalRecords() {
+		return medicalRecords;
 	}
 
-	public void setAge(int age) {
-		this.age = age;
+	public void setMedicalRecords(ArrayList<MedicalRecord> medicalRecords) {
+		this.medicalRecords = medicalRecords;
 	}
 
-    
+	public String getCccd() {
+		return cccd;
+	}
 }
