@@ -5,6 +5,21 @@ import java.awt.event.MouseEvent;
 
 public class HospitalApp {
 	
+	// Ví dụ về bảng hiển thị bệnh nhân
+	public static void showPatientList() {
+	    String[] columns = {"ID", "Tên", "Tuổi", "Giới tính"};
+	    Object[][] data = {
+	        {1, "Nguyễn Văn A", 30, "Nam"},
+	        {2, "Trần Thị B", 25, "Nữ"}
+	    };
+	    JTable table = new JTable(data, columns);
+	    JScrollPane scrollPane = new JScrollPane(table);
+	    JFrame tableFrame = new JFrame("Danh sách Bệnh nhân");
+	    tableFrame.add(scrollPane);
+	    tableFrame.setSize(500, 300);
+	    tableFrame.setVisible(true);
+	}
+	
 	public static void showAbout() {
 	    String[] columns = {"MSSV", "Họ và tên đệm", "Tên"};
 	    Object[][] data = {
@@ -31,10 +46,20 @@ public class HospitalApp {
 
         // Navbar
         JMenuBar menuBar = new JMenuBar();
-        JMenu menuAbout = new JMenu("Thông tin thành viên nhóm 12.1");
+//        JMenu menuPatient = new JMenu("Bệnh nhân");
+//        JMenu menuDoctor = new JMenu("Bác sĩ");
+        JMenu menuAbout = new JMenu("Nhóm 12.1");
+//        menuBar.add(menuPatient);
+//        menuBar.add(menuDoctor);
         menuBar.add(menuAbout);
         frame.setJMenuBar(menuBar);
-
+//        
+//        menuPatient.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent e) {
+//                showPatientList();
+//            }
+//        });
+//        
         menuAbout.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 showAbout();
