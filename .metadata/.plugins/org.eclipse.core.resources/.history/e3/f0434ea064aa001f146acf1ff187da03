@@ -1,0 +1,169 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+
+public class Doctor {
+    private int id;
+    private String password;
+    private String surname;
+    private String firstname;
+    private String faculty;
+    private String phoneNumber;
+    private String email;
+    private String joindate;
+    private ArrayList<Patient> patients;
+    
+	public Doctor(int id, String password, String surname, String firstname, String faculty, String phoneNumber, String email, String joindate) {
+		super();
+		this.id = id;
+		this.password = password;
+		this.surname = surname;
+		this.firstname = firstname;
+		this.faculty = faculty;
+		this.phoneNumber = phoneNumber;
+		this.email = email;
+		this.joindate = joindate;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getSurname() {
+		return surname;
+	}
+
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
+
+	public String getFirstname() {
+		return firstname;
+	}
+
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
+
+	public String getFaculty() {
+		return faculty;
+	}
+
+	public void setFaculty(String faculty) {
+		this.faculty = faculty;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getJoindate() {
+		return joindate;
+	}
+
+	public void setJoindate(String joindate) {
+		this.joindate = joindate;
+	}
+
+	public ArrayList<Patient> getPatients() {
+		return patients;
+	}
+
+	public void setPatients(ArrayList<Patient> patients) {
+		this.patients = patients;
+	}
+	
+	// Method to display login form
+    public void showLoginWindow() {
+        JFrame loginFrame = new JFrame("Đăng nhập admin");
+        loginFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        loginFrame.setSize(300, 200);
+        loginFrame.setLayout(new GridLayout(3, 2, 10, 10));
+        
+        JLabel loginIdLabel = new JLabel("Login ID:");
+        JTextField loginIdField = new JTextField(15);
+        
+        JLabel passwordLabel = new JLabel("Mật khẩu:");
+        JPasswordField passwordField = new JPasswordField(15);
+        
+        JButton loginButton = new JButton("Đăng nhập");
+        
+        loginFrame.add(loginIdLabel);
+        loginFrame.add(loginIdField);
+        loginFrame.add(passwordLabel);
+        loginFrame.add(passwordField);
+        loginFrame.add(new JLabel()); // Empty cell
+        loginFrame.add(loginButton);
+        
+        loginButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                login_id = loginIdField.getText();
+                password = new String(passwordField.getPassword());
+
+                if (authenticate(login_id, password)) {
+//                    JOptionPane.showMessageDialog(loginFrame, "Đăng nhập thành công.");
+                    loginFrame.dispose(); // Close login window
+                    showAdminDashboard(); // Open new window if login successful
+                } else {
+                    JOptionPane.showMessageDialog(loginFrame, "Nhập admin ID hoặc mật khẩu sai, hãy thử lại.");
+                }
+            }
+        });
+        
+        loginFrame.setLocationRelativeTo(null); // Center the window
+        loginFrame.setVisible(true);
+    }
+
+    // Method to authenticate the admin with the database
+    private boolean authenticate(String login_id, String password) {
+        boolean isAuthenticated = false;
+
+        try (Connection conn = DatabaseConnection.connect()) {
+            String sql = "SELECT * FROM admin WHERE loginID = ? AND password = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, login_id);
+            stmt.setString(2, password);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                isAuthenticated = true; // Login successful if we get a result
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+
+        return isAuthenticated;
+    }
+}

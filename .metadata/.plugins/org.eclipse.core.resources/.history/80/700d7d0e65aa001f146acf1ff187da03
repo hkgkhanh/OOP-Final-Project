@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.List;
 
 public class Doctor {
     private int id;
@@ -19,10 +18,6 @@ public class Doctor {
     private String email;
     private String joindate;
     private ArrayList<Patient> patients;
-    
-    public Doctor() {
-        // Default constructor
-    }
     
 	public Doctor(int id, String password, String surname, String firstname, String faculty, String phoneNumber, String email, String joindate) {
 		super();
@@ -110,13 +105,13 @@ public class Doctor {
 	
 	// Method to display login form
     public void showLoginWindow() {
-        JFrame loginFrame = new JFrame("Đăng nhập doctor");
+        JFrame loginFrame = new JFrame("Đăng nhập admin");
         loginFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         loginFrame.setSize(300, 200);
         loginFrame.setLayout(new GridLayout(3, 2, 10, 10));
         
-        JLabel loginIdLabel = new JLabel("Email:");
-        JTextField loginIdField = new JTextField(100);
+        JLabel loginIdLabel = new JLabel("Login ID:");
+        JTextField loginIdField = new JTextField(15);
         
         JLabel passwordLabel = new JLabel("Mật khẩu:");
         JPasswordField passwordField = new JPasswordField(15);
@@ -155,7 +150,7 @@ public class Doctor {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
-            String sql = "SELECT * FROM doctor WHERE email = ? AND password = ?";
+            String sql = "SELECT * FROM admin WHERE email = ? AND password = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, email);
             stmt.setString(2, password);
@@ -211,7 +206,13 @@ public class Doctor {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
+//        // Title
+//        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+//        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+//        panel.add(titleLabel, BorderLayout.NORTH);
 
+        // Button panel with Add, Edit, Delete buttons
+//        JPanel buttonPanel = new JPanel(new GridLayout(3, 1, 5, 5));
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
         JButton addButton = new JButton("Thêm bản ghi");
 //        JButton editButton = new JButton("Sửa");
@@ -279,6 +280,19 @@ public class Doctor {
         	// Add to main dashboard
         	panel.add(scrollablePatientsListPane);
 
+        } else if (title.equals("Bác sĩ")) {
+        	// Inside showAdminDashboard or createManagementPanel
+        	JPanel doctorListPanel = new JPanel();
+        	doctorListPanel.setLayout(new BoxLayout(doctorListPanel, BoxLayout.Y_AXIS));
+        	displayDoctors(doctorListPanel); // Populate with patient records
+        	
+        	// Wrap the patientListPanel in a JScrollPane
+        	JScrollPane scrollableDoctorsListPane = new JScrollPane(doctorListPanel);
+        	scrollableDoctorsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        	// Add to main dashboard
+        	panel.add(scrollableDoctorsListPane);
+        	
         } else if (title.equals("Hồ sơ bệnh án")) {
         	// Inside showAdminDashboard or createManagementPanel
         	JPanel recordListPanel = new JPanel();
@@ -294,89 +308,5 @@ public class Doctor {
         }
 
         return panel;
-    }
-    
-    // Method to get the count from the database
-    private int getCountFromDatabase(String tableName) {
-        int count = 0;
-        String query = "SELECT COUNT(*) FROM " + tableName;
-
-        try (Connection conn = DatabaseConnection.connect();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            if (rs.next()) {
-                count = rs.getInt(1); // Get the count from the first column
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
-        }
-
-        return count;
-    }
-    
-    private List<Patient> getPatientData() {
-        List<Patient> patients = new ArrayList<>();
-        String query = "SELECT * FROM patient";
-
-        try (Connection conn = DatabaseConnection.connect();
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                String cccd = rs.getString("cccd");
-                String firstname = rs.getString("firstname");
-                String surname = rs.getString("surname");
-                String gender = rs.getString("gender");
-                String dateOfBirth = rs.getString("dateOfBirth");
-                String address = rs.getString("address");
-                String phoneNumber = rs.getString("phoneNumber");
-                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
-        }
-
-        return patients;
-    }
-
-    private void displayPatients(JPanel panel) {
-        panel.removeAll(); // Clear any existing content
-
-        List<Patient> patients = getPatientData();
-        for (Patient patient : patients) {
-            JPanel patientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            
-            JLabel nameLabel = new JLabel(patient.getSurname() + " " + patient.getFirstname());
-            JButton editButton = new JButton("Sửa");
-            JButton deleteButton = new JButton("Xóa");
-
-            // Set button action listeners
-            editButton.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-//                    editPatient(patient); // Define this method to edit patient data
-                }
-            });
-
-            deleteButton.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-//                    deletePatient(patient.getId()); // Define this method to delete patient
-                    displayPatients(panel); // Refresh display after deletion
-                }
-            });
-
-            // Add components to the patient panel
-            patientPanel.add(nameLabel);
-            patientPanel.add(editButton);
-            patientPanel.add(deleteButton);
-
-            // Add patient panel to main panel
-            panel.add(patientPanel);
-        }
-
-        panel.revalidate();
-        panel.repaint();
     }
 }

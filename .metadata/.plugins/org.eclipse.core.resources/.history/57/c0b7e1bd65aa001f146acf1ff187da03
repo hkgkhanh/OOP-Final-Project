@@ -89,14 +89,6 @@ public class HospitalApp {
             }
         });
         
-        doctorLoginButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Doctor doctor = new Doctor(); // Create an Doctor object
-                doctor.showLoginWindow(); // Show the Doctor login window
-            }
-        });
-        
         // Thêm các nút vào buttonPanel
         buttonPanel.add(adminLoginButton);
         buttonPanel.add(doctorLoginButton);
