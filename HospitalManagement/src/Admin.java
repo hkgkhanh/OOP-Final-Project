@@ -275,35 +275,92 @@ public class Admin extends Staff {
         return patients;
     }
 
+//    private void displayPatients(JPanel panel) {
+//        panel.removeAll(); // Clear any existing content
+//
+//        List<Patient> patients = getPatientData();
+//        for (Patient patient : patients) {
+//            JPanel patientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//            
+//            JLabel nameLabel = new JLabel(patient.getSurname() + " " + patient.getFirstname());
+//            JLabel genderLabel = new JLabel(patient.getGender());
+//            JLabel dateOfBirthLabel = new JLabel(patient.getDateOfBirth());
+//            JLabel phoneNumberLabel = new JLabel(patient.getPhoneNumber() );
+//            JButton editButton = new JButton("Sửa");
+//            JButton deleteButton = new JButton("Xóa");
+//
+//            // Set button action listeners
+//            editButton.addMouseListener(new MouseAdapter() {
+//                public void mouseClicked(MouseEvent e) {
+////                    editPatient(patient); // Define this method to edit patient data
+//                }
+//            });
+//
+//            deleteButton.addMouseListener(new MouseAdapter() {
+//                public void mouseClicked(MouseEvent e) {
+////                    deletePatient(patient.getId()); // Define this method to delete patient
+//                    displayPatients(panel); // Refresh display after deletion
+//                }
+//            });
+//
+//            // Add components to the patient panel
+//            patientPanel.add(nameLabel);
+//            patientPanel.add(genderLabel);
+//            patientPanel.add(genderLabel);
+//            patientPanel.add(phoneNumberLabel);
+//            patientPanel.add(editButton);
+//            patientPanel.add(deleteButton);
+//
+//            // Add patient panel to main panel
+//            panel.add(patientPanel);
+//        }
+//
+//        panel.revalidate();
+//        panel.repaint();
+//    }
     private void displayPatients(JPanel panel) {
         panel.removeAll(); // Clear any existing content
 
         List<Patient> patients = getPatientData();
         for (Patient patient : patients) {
-            JPanel patientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JPanel patientPanel = new JPanel();
+            patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS)); // Set layout to BoxLayout.Y_AXIS
             
-            JLabel nameLabel = new JLabel(patient.getSurname() + " " + patient.getFirstname());
+            // Add labels for patient information
+            JLabel nameLabel = new JLabel("Họ và Tên: " + patient.getSurname() + " " + patient.getFirstname());
+            JLabel genderLabel = new JLabel("Giới tính: " + patient.getGender());
+            JLabel dateOfBirthLabel = new JLabel("Ngày sinh: " + patient.getDateOfBirth());
+            JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + patient.getPhoneNumber());
+            
+            // Add buttons for edit and delete
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
             // Set button action listeners
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    editPatient(patient); // Define this method to edit patient data
+                	editPatient(patient, panel);
                 }
             });
 
             deleteButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    deletePatient(patient.getId()); // Define this method to delete patient
+                    // Define delete logic here
                     displayPatients(panel); // Refresh display after deletion
                 }
             });
 
-            // Add components to the patient panel
+            // Add components to button panel
+            buttonPanel.add(editButton);
+            buttonPanel.add(deleteButton);
+
+            // Add all components to the patient panel
             patientPanel.add(nameLabel);
-            patientPanel.add(editButton);
-            patientPanel.add(deleteButton);
+            patientPanel.add(genderLabel);
+            patientPanel.add(dateOfBirthLabel);
+            patientPanel.add(phoneNumberLabel);
+            patientPanel.add(buttonPanel);
 
             // Add patient panel to main panel
             panel.add(patientPanel);
@@ -439,4 +496,68 @@ public class Admin extends Staff {
         panel.revalidate();
         panel.repaint();
     }
+    
+    private void editPatient(Patient patient, JPanel panel) {
+        // Tạo JDialog để sửa thông tin bệnh nhân
+        JDialog editDialog = new JDialog();
+        editDialog.setTitle("Chỉnh sửa thông tin bệnh nhân");
+        editDialog.setSize(400, 350); // Tăng kích thước một chút
+        editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS)); // Dùng BoxLayout theo chiều dọc
+
+        // Thêm các trường thông tin bệnh nhân
+        JLabel cccdLabel = new JLabel("CCCD: " + patient.getCccd()); // Hiển thị CCCD, không cho phép chỉnh sửa
+        JTextField firstNameField = new JTextField(patient.getFirstname());
+        JTextField lastNameField = new JTextField(patient.getSurname());
+        JTextField dateOfBirthField = new JTextField(patient.getDateOfBirth());
+        JTextField phoneField = new JTextField(patient.getPhoneNumber());
+        JTextField addressField = new JTextField(patient.getAddress());
+        JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
+        genderComboBox.setSelectedItem(patient.getGender());
+
+        // Thêm các thành phần vào dialog (theo từng dòng)
+        editDialog.add(cccdLabel);  // Hiển thị CCCD ở trên cùng, không cho phép chỉnh sửa
+        editDialog.add(new JLabel("Họ:"));
+        editDialog.add(lastNameField);
+        editDialog.add(new JLabel("Tên:"));
+        editDialog.add(firstNameField);
+        editDialog.add(new JLabel("Ngày Sinh:"));
+        editDialog.add(dateOfBirthField);
+        editDialog.add(new JLabel("Số Điện Thoại:"));
+        editDialog.add(phoneField);
+        editDialog.add(new JLabel("Địa Chỉ:"));
+        editDialog.add(addressField);
+        editDialog.add(new JLabel("Giới Tính:"));
+        editDialog.add(genderComboBox);
+
+        // Nút lưu thay đổi
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Lưu thông tin bệnh nhân đã chỉnh sửa
+                patient.setFirstname(firstNameField.getText());
+                patient.setSurname(lastNameField.getText());
+                patient.setDateOfBirth(dateOfBirthField.getText());
+                patient.setPhoneNumber(phoneField.getText());
+                patient.setAddress(addressField.getText());
+                patient.setGender((String) genderComboBox.getSelectedItem());
+
+                // Cập nhật thông tin vào cơ sở dữ liệu
+                if (patient.updatePatient()) {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                    editDialog.dispose(); // Đóng cửa sổ sửa
+                    displayPatients(panel); // Cập nhật lại danh sách bệnh nhân
+                } else {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                }
+            }
+        });
+        editDialog.add(saveButton); // Thêm nút lưu vào cuối cửa sổ
+
+        editDialog.setLocationRelativeTo(null); // Đặt dialog ở giữa màn hình
+        editDialog.setVisible(true); // Hiển thị dialog
+    }
+
+
+
 }

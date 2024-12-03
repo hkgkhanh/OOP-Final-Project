@@ -88,4 +88,25 @@ public class Patient {
 	public String getCccd() {
 		return cccd;
 	}
+	
+	public boolean updatePatient() {
+	    String sql = "UPDATE patient SET firstname = ?, surname = ?, gender = ?, phoneNumber = ?, address = ? WHERE cccd = ?";
+
+	    try (Connection conn = DatabaseConnection.connect();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+	        
+	        stmt.setString(1, this.firstname);
+	        stmt.setString(2, this.surname);
+	        stmt.setString(3, this.gender);
+	        stmt.setString(4, this.phoneNumber);
+	        stmt.setString(5, this.address);
+	        stmt.setString(6, this.cccd);
+
+	        return stmt.executeUpdate() > 0;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
 }
