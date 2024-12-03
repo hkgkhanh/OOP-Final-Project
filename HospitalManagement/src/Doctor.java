@@ -9,104 +9,86 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.List;
 
-public class Doctor {
-    private int id;
-    private String password;
-    private String surname;
-    private String firstname;
-    private String faculty;
-    private String phoneNumber;
-    private String email;
-    private String joindate;
-    private ArrayList<Patient> patients;
-    
-    public Doctor() {
-        // Default constructor
-    }
-    
-	public Doctor(int id, String password, String surname, String firstname, String faculty, String phoneNumber, String email, String joindate) {
-		super();
-		this.id = id;
-		this.password = password;
-		this.surname = surname;
-		this.firstname = firstname;
-		this.faculty = faculty;
-		this.phoneNumber = phoneNumber;
-		this.email = email;
-		this.joindate = joindate;
-	}
+public class Doctor extends Staff {
+        private String surname;
+        private String firstname;
+        private String faculty;
+        private String phoneNumber;
+        private String email;
+        private String joinDate;
+        private ArrayList<Patient> patients;
 
-	public int getId() {
-		return id;
-	}
+        public Doctor() {
+            // Default constructor
+        }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+        public Doctor(String id, String password, String surname, String firstname, String faculty, String phoneNumber, String email, String joinDate) {
+            super(id, password); // Gọi constructor của Staff
+            this.surname = surname;
+            this.firstname = firstname;
+            this.faculty = faculty;
+            this.phoneNumber = phoneNumber;
+            this.email = email;
+            this.joinDate = joinDate;
+            this.patients = new ArrayList<>();
+        }
 
-	public String getPassword() {
-		return password;
-	}
+        // Getters và Setters cho các thuộc tính riêng
+        public String getSurname() {
+            return surname;
+        }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+        public void setSurname(String surname) {
+            this.surname = surname;
+        }
 
-	public String getSurname() {
-		return surname;
-	}
+        public String getFirstname() {
+            return firstname;
+        }
 
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
+        public void setFirstname(String firstname) {
+            this.firstname = firstname;
+        }
 
-	public String getFirstname() {
-		return firstname;
-	}
+        public String getFaculty() {
+            return faculty;
+        }
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
+        public void setFaculty(String faculty) {
+            this.faculty = faculty;
+        }
 
-	public String getFaculty() {
-		return faculty;
-	}
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
 
-	public void setFaculty(String faculty) {
-		this.faculty = faculty;
-	}
+        public void setPhoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+        }
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+        public String getEmail() {
+            return email;
+        }
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+        public void setEmail(String email) {
+            this.email = email;
+        }
 
-	public String getEmail() {
-		return email;
-	}
+        public String getJoinDate() {
+            return joinDate;
+        }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+        public void setJoinDate(String joinDate) {
+            this.joinDate = joinDate;
+        }
 
-	public String getJoindate() {
-		return joindate;
-	}
+        public ArrayList<Patient> getPatients() {
+            return patients;
+        }
 
-	public void setJoindate(String joindate) {
-		this.joindate = joindate;
-	}
-
-	public ArrayList<Patient> getPatients() {
-		return patients;
-	}
-
-	public void setPatients(ArrayList<Patient> patients) {
-		this.patients = patients;
-	}
+        public void setPatients(ArrayList<Patient> patients) {
+            this.patients = patients;
+        }
 	
 	// Method to display login form
     public void showLoginWindow() {

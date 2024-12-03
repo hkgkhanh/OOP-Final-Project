@@ -9,17 +9,12 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Admin {
-	private String login_id;
-    private String password;
+public class Admin extends Staff {
     
-    public Admin() {
-        // Default constructor
-    }
+    public Admin() {}
 
-    public Admin(String login_id, String password) {
-        this.login_id = login_id;
-        this.password = password;
+    public Admin(String id, String password) {
+        super(id, password); // Kế thừa từ Staff
     }
 
     // Method to display login form
@@ -47,10 +42,10 @@ public class Admin {
         loginButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                login_id = loginIdField.getText();
+                id = loginIdField.getText();
                 password = new String(passwordField.getPassword());
 
-                if (authenticate(login_id, password)) {
+                if (authenticate(id, password)) {
 //                    JOptionPane.showMessageDialog(loginFrame, "Đăng nhập thành công.");
                     loginFrame.dispose(); // Close login window
                     showAdminDashboard(); // Open new window if login successful
@@ -65,13 +60,13 @@ public class Admin {
     }
 
     // Method to authenticate the admin with the database
-    private boolean authenticate(String login_id, String password) {
+    private boolean authenticate(String id, String password) {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
             String sql = "SELECT * FROM admin WHERE adminID = ? AND password = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, login_id);
+            stmt.setString(1, id);
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
@@ -104,7 +99,7 @@ public class Admin {
         menuBar.add(menuLogout);
         dashboardFrame.setJMenuBar(menuBar);
         
-        JLabel welcomeLabel = new JLabel("Xin chào, " + login_id + "!", SwingConstants.LEFT);
+        JLabel welcomeLabel = new JLabel("Xin chào, " + id + "!", SwingConstants.LEFT);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
         
 //        dashboardFrame.add(welcomeLabel, BorderLayout.NORTH);
@@ -328,7 +323,7 @@ public class Admin {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int id = rs.getInt("doctorID");
+                String id = rs.getString("id");
                 String password = rs.getString("password");
                 String firstname = rs.getString("firstname");
                 String surname = rs.getString("surname");
