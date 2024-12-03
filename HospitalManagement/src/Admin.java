@@ -323,7 +323,7 @@ public class Admin extends Staff {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                String id = rs.getString("id");
+                String id = rs.getString("doctorID");
                 String password = rs.getString("password");
                 String firstname = rs.getString("firstname");
                 String surname = rs.getString("surname");
