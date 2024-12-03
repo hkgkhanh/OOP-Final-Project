@@ -69,7 +69,7 @@ public class Admin {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
-            String sql = "SELECT * FROM admin WHERE loginID = ? AND password = ?";
+            String sql = "SELECT * FROM admin WHERE adminID = ? AND password = ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, login_id);
             stmt.setString(2, password);
