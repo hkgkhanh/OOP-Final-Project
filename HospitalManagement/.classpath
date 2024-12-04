@@ -16,6 +16,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/HospitalManagement/lib/miglayout-core-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/CodeLibrary/mysql-connector-j-9.1.0/mysql-connector-j-9.1.0.jar"/>
+	<classpathentry kind="lib" path="HospitalManagement/lib/mysql-connector-j-9.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
