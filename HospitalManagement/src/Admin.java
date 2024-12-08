@@ -445,11 +445,22 @@ public class Admin extends Staff {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int id = rs.getInt("recordID");
-                String cccd = rs.getString("cccd");
-                int doctorID = rs.getInt("doctorID");
-                String dateOfVisit = rs.getString("dateOfVisit");
-                records.add(new MedicalRecord(id, cccd, doctorID, dateOfVisit));
+//                int id = rs.getInt("recordID");
+//                String cccd = rs.getString("cccd");
+//                int doctorID = rs.getInt("doctorID");
+//                String dateOfVisit = rs.getString("dateOfVisit");
+//                records.add(new MedicalRecord(id, cccd, doctorID, dateOfVisit));
+            	int id = rs.getInt("recordID");
+            	String cccd = rs.getString("cccd");
+            	int doctorID = rs.getInt("doctorID");
+            	String diagnosis = rs.getString("diagnosis");
+            	String treatment = rs.getString("treatment");
+            	String prescription = rs.getString("diagnosis");
+            	String dateOfVisit = rs.getString("dateOfVisit");
+            	int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
+            	String followUpDate = rs.getString("followUpDate");
+            	String note = rs.getString("note");
+            	records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note));
             }
         } catch (SQLException e) {
             e.printStackTrace();
