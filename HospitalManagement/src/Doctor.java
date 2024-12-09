@@ -114,6 +114,25 @@ public class Doctor extends Staff {
                 return false; // Trả về false nếu có lỗi
             }
         }
+        public boolean updateDoctor() {
+            String sql = "UPDATE doctor SET firstname = ?, surname = ?, phoneNumber = ?, email = ?, faculty = ?, joinDate = ? WHERE doctorID = ?";
+
+            try (Connection conn = DatabaseConnection.connect();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, this.firstname);
+                stmt.setString(2, this.surname);
+                stmt.setString(3, this.phoneNumber);
+                stmt.setString(4, this.email);
+                stmt.setString(5, this.faculty);
+                stmt.setString(6, this.joinDate);
+                stmt.setString(7, this.id);
+
+                return stmt.executeUpdate() > 0;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
 	
 	// Method to display login form

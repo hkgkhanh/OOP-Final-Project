@@ -483,7 +483,7 @@ public class Admin extends Staff {
             // Gán sự kiện cho nút sửa
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    editDoctor(doctor, panel); // Gọi hàm chỉnh sửa bác sĩ
+                editDoctor(doctor, panel); // Gọi hàm chỉnh sửa bác sĩ
                 }
             });
 
@@ -648,7 +648,69 @@ public class Admin extends Staff {
         editDialog.setLocationRelativeTo(null); // Đặt dialog ở giữa màn hình
         editDialog.setVisible(true); // Hiển thị dialog
     }
+    
+    private void editDoctor(Doctor doctor, JPanel panel) {
+        // Tạo JDialog để sửa thông tin bác sĩ
+        JDialog editDialog = new JDialog();
+        editDialog.setTitle("Chỉnh sửa thông tin bác sĩ");
+        editDialog.setSize(400, 400);
+        editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS));
 
+        // Các trường thông tin của bác sĩ
+        JLabel idLabel = new JLabel("ID: " + doctor.getId()); // Hiển thị ID, không cho phép chỉnh sửa
+        JTextField firstNameField = new JTextField(doctor.getFirstname());
+        JTextField lastNameField = new JTextField(doctor.getSurname());
+        JTextField phoneField = new JTextField(doctor.getPhoneNumber());
+        JTextField emailField = new JTextField(doctor.getEmail());
+        JTextField facultyField = new JTextField(doctor.getFaculty());
+        JTextField joinDateField = new JTextField(doctor.getJoinDate());
+
+        // Thêm các thành phần vào dialog
+        editDialog.add(idLabel);
+        editDialog.add(new JLabel("Họ:"));
+        editDialog.add(lastNameField);
+        editDialog.add(new JLabel("Tên:"));
+        editDialog.add(firstNameField);
+        editDialog.add(new JLabel("Số điện thoại:"));
+        editDialog.add(phoneField);
+        editDialog.add(new JLabel("Email:"));
+        editDialog.add(emailField);
+        editDialog.add(new JLabel("Khoa:"));
+        editDialog.add(facultyField);
+        editDialog.add(new JLabel("Ngày tham gia:"));
+        editDialog.add(joinDateField);
+
+        // Nút lưu thay đổi
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Lưu thông tin bác sĩ đã chỉnh sửa
+                doctor.setFirstname(firstNameField.getText());
+                doctor.setSurname(lastNameField.getText());
+                doctor.setPhoneNumber(phoneField.getText());
+                doctor.setEmail(emailField.getText());
+                doctor.setFaculty(facultyField.getText());
+                doctor.setJoinDate(joinDateField.getText());
+
+                // Cập nhật thông tin vào cơ sở dữ liệu
+                if (doctor.updateDoctor()) {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                    editDialog.dispose(); // Đóng dialog sau khi lưu
+                    displayDoctors(panel); // Cập nhật danh sách bác sĩ
+                } else {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                }
+            }
+        });
+
+        editDialog.add(saveButton); // Thêm nút lưu vào cuối dialog
+
+        editDialog.setLocationRelativeTo(null); // Hiển thị dialog ở giữa màn hình
+        editDialog.setVisible(true); // Hiển thị dialog
+    }
+
+    
     public void createPatientDialog(JPanel patientListPanel, JLabel countLabel, String type) {
         JDialog createDialog = new JDialog();
         createDialog.setTitle("Thêm bệnh nhân mới");
