@@ -107,11 +107,11 @@ public class Admin extends Staff {
         dashboardFrame.setLayout(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns
 
         // Panel for Patient Management
-        JPanel patientPanel = createManagementPanel("Bệnh nhân", "patient");
+        JPanel patientPanel = createManagementPanel_Patient("Bệnh nhân", "patient");
         // Panel for Doctor Management
-        JPanel doctorPanel = createManagementPanel("Bác sĩ", "doctor");
+        JPanel doctorPanel = createManagementPanel_Doctor("Bác sĩ", "doctor");
         // Panel for Room Management (no count)
-        JPanel recordPanel = createManagementPanel("Hồ sơ bệnh án", "medicalrecord");
+        JPanel recordPanel = createManagementPanel_Record("Hồ sơ bệnh án", "medicalrecord");
 
         dashboardFrame.add(patientPanel);
         dashboardFrame.add(doctorPanel);
@@ -121,15 +121,15 @@ public class Admin extends Staff {
         dashboardFrame.setVisible(true);
     }
     
-    private JPanel createManagementPanel(String title, String type) {
+    private JPanel createManagementPanel_Patient(String title, String type) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
         // Button panel with Add button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-//        JButton addButton = new JButton("Thêm bản ghi");
-//        addButton.setPreferredSize(new Dimension(150, 25));
-//        buttonPanel.add(addButton);
+        JButton addPatientButton = new JButton("Thêm bệnh nhân");
+        addPatientButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addPatientButton);
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -141,71 +141,105 @@ public class Admin extends Staff {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Add specific functionality based on the type (e.g., Bệnh nhân, Bác sĩ)
-        if (title.equals("Bệnh nhân")) {
-            JButton addPatientButton = new JButton("Thêm bệnh nhân");
-            addPatientButton.setPreferredSize(new Dimension(150, 25));
-            buttonPanel.add(addPatientButton);
+        // Danh sách bệnh nhân
+        JPanel patientListPanel = new JPanel();
+        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
+        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
 
-            addPatientButton.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    createPatientDialog(panel); // Gọi giao diện thêm bệnh nhân
-                }
-            });
+        // Hiển thị danh sách bệnh nhân ban đầu
+        displayPatients(patientListPanel);
 
-            // Danh sách bệnh nhân
-            JPanel patientListPanel = new JPanel();
-            patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
-            displayPatients(patientListPanel); // Hiển thị danh sách bệnh nhân
+        // Hành động nút thêm bệnh nhân
+        addPatientButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                createPatientDialog(patientListPanel, countLabel, type);
+            }
+        });
 
-            JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
-            scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        return panel;
+    }
 
-            panel.add(scrollablePatientsListPane, BorderLayout.CENTER); // Thêm danh sách bệnh nhân
-        } else if (title.equals("Bác sĩ")) {
-            JButton addDoctorButton = new JButton("Thêm bác sĩ");
-            addDoctorButton.setPreferredSize(new Dimension(150, 25));
-            buttonPanel.add(addDoctorButton);
+    private JPanel createManagementPanel_Doctor(String title, String type) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(10, 10));
 
-            addDoctorButton.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    // Gọi giao diện thêm bác sĩ (tương tự createPatientDialog)
-                    JOptionPane.showMessageDialog(null, "Thêm bác sĩ được gọi!");
-                }
-            });
+        // Button panel with Add button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JButton addPatientButton = new JButton("Thêm bệnh nhân");
+        addPatientButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addPatientButton);
 
-            JPanel doctorListPanel = new JPanel();
-            doctorListPanel.setLayout(new BoxLayout(doctorListPanel, BoxLayout.Y_AXIS));
-            displayDoctors(doctorListPanel); // Hiển thị danh sách bác sĩ
-
-            JScrollPane scrollableDoctorsListPane = new JScrollPane(doctorListPanel);
-            scrollableDoctorsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-            panel.add(scrollableDoctorsListPane, BorderLayout.CENTER); // Thêm danh sách bác sĩ
-        } else if (title.equals("Hồ sơ bệnh án")) {
-            JButton addRecordButton = new JButton("Thêm hồ sơ bệnh án");
-            addRecordButton.setPreferredSize(new Dimension(150, 25));
-            buttonPanel.add(addRecordButton);
-
-            addRecordButton.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    // Gọi giao diện thêm hồ sơ bệnh án (tương tự createPatientDialog)
-                    JOptionPane.showMessageDialog(null, "Thêm hồ sơ bệnh án được gọi!");
-                }
-            });
-
-            JPanel recordListPanel = new JPanel();
-            recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
-            displayRecords(recordListPanel); // Hiển thị danh sách hồ sơ bệnh án
-
-            JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
-            scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-            panel.add(scrollableRecordsListPane, BorderLayout.CENTER); // Thêm danh sách hồ sơ bệnh án
+        // Count label
+        JLabel countLabel = new JLabel();
+        if (type != null) {
+            int count = getCountFromDatabase(type);
+            countLabel.setText(title + " (" + count + ")");
+            panel.add(countLabel, BorderLayout.NORTH);
         }
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Danh sách bệnh nhân
+        JPanel patientListPanel = new JPanel();
+        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
+        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
+
+        // Hiển thị danh sách bệnh nhân ban đầu
+        displayPatients(patientListPanel);
+
+        // Hành động nút thêm bệnh nhân
+        addPatientButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                createPatientDialog(patientListPanel, countLabel, type);
+            }
+        });
+
+        return panel;
+    }
+    
+    private JPanel createManagementPanel_Record(String title, String type) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(10, 10));
+
+        // Button panel with Add button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JButton addPatientButton = new JButton("Thêm bệnh nhân");
+        addPatientButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addPatientButton);
+
+        // Count label
+        JLabel countLabel = new JLabel();
+        if (type != null) {
+            int count = getCountFromDatabase(type);
+            countLabel.setText(title + " (" + count + ")");
+            panel.add(countLabel, BorderLayout.NORTH);
+        }
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Danh sách bệnh nhân
+        JPanel patientListPanel = new JPanel();
+        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
+        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
+
+        // Hiển thị danh sách bệnh nhân ban đầu
+        displayPatients(patientListPanel);
+
+        // Hành động nút thêm bệnh nhân
+        addPatientButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                createPatientDialog(patientListPanel, countLabel, type);
+            }
+        });
 
         return panel;
     }
@@ -223,6 +257,7 @@ public class Admin extends Staff {
             if (rs.next()) {
                 count = rs.getInt(1); // Get the count from the first column
             }
+            
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
@@ -551,7 +586,7 @@ public class Admin extends Staff {
         editDialog.setVisible(true); // Hiển thị dialog
     }
 
-    public void createPatientDialog(JPanel panel) {
+    public void createPatientDialog(JPanel patientListPanel, JLabel countLabel, String type) {
         JDialog createDialog = new JDialog();
         createDialog.setTitle("Thêm bệnh nhân mới");
         createDialog.setSize(400, 350);
@@ -584,7 +619,6 @@ public class Admin extends Staff {
         saveButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Tạo đối tượng Patient và gọi phương thức createPatient
                 Patient patient = new Patient(
                     cccdField.getText(),
                     lastNameField.getText(),
@@ -598,17 +632,22 @@ public class Admin extends Staff {
                 if (patient.createPatient()) {
                     JOptionPane.showMessageDialog(null, "Thêm bệnh nhân thành công!");
                     createDialog.dispose();
-                    JPanel new_panel = new JPanel();
-                    displayPatients(new_panel); // Cập nhật danh sách bệnh nhân
+                    displayPatients(patientListPanel); // Cập nhật danh sách bệnh nhân
+                    
+                    // Cập nhật countLabel
+                    int updatedCount = getCountFromDatabase(type);
+                    countLabel.setText("Bệnh nhân (" + updatedCount + ")");
                 } else {
                     JOptionPane.showMessageDialog(null, "Thêm bệnh nhân thất bại!");
                 }
             }
         });
+
         createDialog.add(saveButton);
 
         createDialog.setLocationRelativeTo(null);
         createDialog.setVisible(true);
     }
+
 
 }
