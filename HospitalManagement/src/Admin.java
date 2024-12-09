@@ -301,53 +301,55 @@ public class Admin extends Staff {
 //        panel.repaint();
 //    }
     private void displayPatients(JPanel panel) {
-        panel.removeAll(); // Xóa toàn bộ nội dung cũ
+        panel.removeAll(); // Clear any existing content
 
-        List<Patient> patients = getPatientData(); // Lấy dữ liệu bệnh nhân từ cơ sở dữ liệu
+        List<Patient> patients = getPatientData();
         for (Patient patient : patients) {
             JPanel patientPanel = new JPanel();
-            patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
-
+            patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS)); // Set layout to BoxLayout.Y_AXIS
+            
+            // Add labels for patient information
             JLabel nameLabel = new JLabel("Họ và Tên: " + patient.getSurname() + " " + patient.getFirstname());
             JLabel genderLabel = new JLabel("Giới tính: " + patient.getGender());
             JLabel dateOfBirthLabel = new JLabel("Ngày sinh: " + patient.getDateOfBirth());
             JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + patient.getPhoneNumber());
-
+            
+            // Add buttons for edit and delete
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
-            // Hành động nút sửa
+            // Set button action listeners
             editButton.addMouseListener(new MouseAdapter() {
-                @Override
                 public void mouseClicked(MouseEvent e) {
-                    editPatient(patient, panel);
+                	editPatient(patient, panel);
                 }
             });
 
-            // Hành động nút xóa
             deleteButton.addMouseListener(new MouseAdapter() {
-                @Override
                 public void mouseClicked(MouseEvent e) {
-                    deletePatient(patient.getCccd());
-                    displayPatients(panel); // Làm mới danh sách sau khi xóa
+                    // Define delete logic here
+                    displayPatients(panel); // Refresh display after deletion
                 }
             });
 
+            // Add components to button panel
             buttonPanel.add(editButton);
             buttonPanel.add(deleteButton);
 
+            // Add all components to the patient panel
             patientPanel.add(nameLabel);
             patientPanel.add(genderLabel);
             patientPanel.add(dateOfBirthLabel);
             patientPanel.add(phoneNumberLabel);
             patientPanel.add(buttonPanel);
 
-            panel.add(patientPanel); // Thêm panel bệnh nhân vào panel chính
+            // Add patient panel to main panel
+            panel.add(patientPanel);
         }
 
-        panel.revalidate(); // Làm mới giao diện
-        panel.repaint();    // Vẽ lại giao diện
+        panel.revalidate();
+        panel.repaint();
     }
 
 
@@ -596,7 +598,8 @@ public class Admin extends Staff {
                 if (patient.createPatient()) {
                     JOptionPane.showMessageDialog(null, "Thêm bệnh nhân thành công!");
                     createDialog.dispose();
-                    displayPatients(panel); // Cập nhật danh sách bệnh nhân
+                    JPanel new_panel = new JPanel();
+                    displayPatients(new_panel); // Cập nhật danh sách bệnh nhân
                 } else {
                     JOptionPane.showMessageDialog(null, "Thêm bệnh nhân thất bại!");
                 }
