@@ -133,6 +133,20 @@ public class Doctor extends Staff {
                 return false;
             }
         }
+        public boolean deleteDoctor(String doctorID) {
+            String sql = "DELETE FROM doctor WHERE doctorID = ?";
+
+            try (Connection conn = DatabaseConnection.connect();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                stmt.setString(1, doctorID); // Gán giá trị doctorID
+
+                return stmt.executeUpdate() > 0; // Trả về true nếu xóa thành công
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false; // Trả về false nếu xảy ra lỗi
+            }
+        }
 
 	
 	// Method to display login form

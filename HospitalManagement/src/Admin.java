@@ -364,11 +364,21 @@ public class Admin extends Staff {
             });
 
             deleteButton.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
-                    // Define delete logic here
-                    displayPatients(panel); // Refresh display after deletion
+                    int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa bệnh nhân này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        if (patient.deletePatient(patient.getCccd())) {
+                            JOptionPane.showMessageDialog(null, "Xóa bệnh nhân thành công!");
+                            displayPatients(panel); // Làm mới danh sách sau khi xóa
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Xóa bệnh nhân thất bại!");
+                        }
+                    }
                 }
             });
+
 
             // Add components to button panel
             buttonPanel.add(editButton);
@@ -489,11 +499,21 @@ public class Admin extends Staff {
 
             // Gán sự kiện cho nút xóa
             deleteButton.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
-//                    deleteDoctor(doctor.getId()); // Xóa bác sĩ theo ID
-                    displayDoctors(panel); // Làm mới danh sách sau khi xóa
+                    int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa bác sĩ này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        if (doctor.deleteDoctor(doctor.getId())) {
+                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thành công!");
+                            displayDoctors(panel); // Làm mới danh sách sau khi xóa
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thất bại!");
+                        }
+                    }
                 }
             });
+
 
             // Thêm các nút vào buttonPanel
             buttonPanel.add(editButton);

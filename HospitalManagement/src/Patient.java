@@ -130,5 +130,19 @@ public class Patient {
 	    }
 	}
 
+	public boolean deletePatient(String cccd) {
+	    String sql = "DELETE FROM patient WHERE cccd = ?";
+
+	    try (Connection conn = DatabaseConnection.connect();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        stmt.setString(1, cccd); // Gán giá trị CCCD
+
+	        return stmt.executeUpdate() > 0; // Trả về true nếu xóa thành công
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false; // Trả về false nếu xảy ra lỗi
+	    }
+	}
 
 }
