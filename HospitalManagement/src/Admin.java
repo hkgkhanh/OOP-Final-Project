@@ -168,9 +168,9 @@ public class Admin extends Staff {
 
         // Button panel with Add button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton addPatientButton = new JButton("Thêm bệnh nhân");
-        addPatientButton.setPreferredSize(new Dimension(150, 25));
-        buttonPanel.add(addPatientButton);
+        JButton addDoctorButton = new JButton("Thêm bác sĩ");
+        addDoctorButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addDoctorButton);
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -182,26 +182,27 @@ public class Admin extends Staff {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Danh sách bệnh nhân
-        JPanel patientListPanel = new JPanel();
-        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
-        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
-        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
+        // Danh sách bác sĩ
+        JPanel doctorListPanel = new JPanel();
+        doctorListPanel.setLayout(new BoxLayout(doctorListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollableDoctorsListPane = new JScrollPane(doctorListPanel);
+        scrollableDoctorsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollableDoctorsListPane, BorderLayout.CENTER);
 
-        // Hiển thị danh sách bệnh nhân ban đầu
-        displayPatients(patientListPanel);
+        // Hiển thị danh sách bác sĩ ban đầu
+        displayDoctors(doctorListPanel);
 
-        // Hành động nút thêm bệnh nhân
-        addPatientButton.addMouseListener(new MouseAdapter() {
+        // Hành động nút thêm bác sĩ
+        addDoctorButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                createPatientDialog(patientListPanel, countLabel, type);
+                createDoctorDialog(doctorListPanel, countLabel, type);
             }
         });
 
         return panel;
     }
+
     
     private JPanel createManagementPanel_Record(String title, String type) {
         JPanel panel = new JPanel();
@@ -649,5 +650,84 @@ public class Admin extends Staff {
         createDialog.setVisible(true);
     }
 
+    public void createDoctorDialog(JPanel doctorListPanel, JLabel countLabel, String type) {
+        JDialog createDialog = new JDialog();
+        createDialog.setTitle("Thêm bác sĩ mới");
+        createDialog.setSize(400, 350);
+        createDialog.setLayout(new BoxLayout(createDialog.getContentPane(), BoxLayout.Y_AXIS));
+
+        JTextField idField = new JTextField();
+        JTextField passwordField = new JTextField();
+        JTextField firstNameField = new JTextField();
+        JTextField lastNameField = new JTextField();
+        JTextField facultyField = new JTextField();
+        JTextField phoneField = new JTextField();
+        JTextField emailField = new JTextField();
+        JTextField joinDateField = new JTextField();
+
+        createDialog.add(new JLabel("ID:"));
+        createDialog.add(idField);
+        createDialog.add(new JLabel("Mật khẩu:"));
+        createDialog.add(passwordField);
+        createDialog.add(new JLabel("Họ:"));
+        createDialog.add(lastNameField);
+        createDialog.add(new JLabel("Tên:"));
+        createDialog.add(firstNameField);
+        createDialog.add(new JLabel("Khoa:"));
+        createDialog.add(facultyField);
+        createDialog.add(new JLabel("Số Điện Thoại:"));
+        createDialog.add(phoneField);
+        createDialog.add(new JLabel("Email:"));
+        createDialog.add(emailField);
+        createDialog.add(new JLabel("Ngày tham gia:"));
+        createDialog.add(joinDateField);
+        
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        	    // Kiểm tra đầu vào
+        	    if (idField.getText().isEmpty() || lastNameField.getText().isEmpty() || firstNameField.getText().isEmpty() || 
+        	        facultyField.getText().isEmpty() || phoneField.getText().isEmpty() || emailField.getText().isEmpty() || 
+        	        passwordField.getText().isEmpty() || joinDateField.getText().isEmpty()) {
+        	        JOptionPane.showMessageDialog(null, "Vui lòng nhập đầy đủ thông tin!");
+        	        return;
+        	    }
+
+        	    // Tạo đối tượng Doctor
+        	    Doctor doctor = new Doctor(
+        	        idField.getText(),
+        	        passwordField.getText(),
+        	        lastNameField.getText(),
+        	        firstNameField.getText(),
+        	        facultyField.getText(),
+        	        phoneField.getText(),
+        	        emailField.getText(),
+        	        joinDateField.getText() // Join date
+        	    );
+
+        	    // Gọi phương thức tạo bác sĩ trong cơ sở dữ liệu
+        	    if (doctor.createDoctor()) {
+        	        JOptionPane.showMessageDialog(null, "Thêm bác sĩ thành công!");
+        	        createDialog.dispose();
+
+        	        // Cập nhật danh sách bác sĩ
+        	        displayDoctors(doctorListPanel);
+
+        	        // Cập nhật countLabel
+        	        int updatedCount = getCountFromDatabase("doctor");
+        	        countLabel.setText("Bác sĩ (" + updatedCount + ")");
+        	    } else {
+        	        JOptionPane.showMessageDialog(null, "Thêm bác sĩ thất bại!");
+        	    }
+        	}
+
+        });
+
+        createDialog.add(saveButton);
+
+        createDialog.setLocationRelativeTo(null);
+        createDialog.setVisible(true);
+    }
 
 }

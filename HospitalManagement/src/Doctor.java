@@ -89,6 +89,32 @@ public class Doctor extends Staff {
         public void setPatients(ArrayList<Patient> patients) {
             this.patients = patients;
         }
+        public boolean createDoctor() {
+            String sql = "INSERT INTO doctor (doctorID, password, firstname, surname, faculty, phoneNumber, email, joinDate) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+            try (Connection conn = DatabaseConnection.connect();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+                // Thiết lập các giá trị thuộc tính của đối tượng Doctor
+                stmt.setString(1, this.getId()); // ID bác sĩ
+                stmt.setString(2, this.getPassword()); // Mật khẩu
+                stmt.setString(3, this.firstname); // Tên
+                stmt.setString(4, this.surname); // Họ
+                stmt.setString(5, this.faculty); // Khoa
+                stmt.setString(6, this.phoneNumber); // Số điện thoại
+                stmt.setString(7, this.email); // Email
+                stmt.setString(8, this.joinDate); // Ngày tham gia
+
+                // Thực hiện lệnh INSERT và kiểm tra kết quả
+                return stmt.executeUpdate() > 0; // Trả về true nếu thêm thành công
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Lỗi khi thêm bác sĩ: " + e.getMessage());
+                return false; // Trả về false nếu có lỗi
+            }
+        }
+
 	
 	// Method to display login form
     public void showLoginWindow() {
