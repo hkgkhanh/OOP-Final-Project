@@ -108,5 +108,27 @@ public class Patient {
 	        return false;
 	    }
 	}
+	public boolean createPatient() {
+	    String sql = "INSERT INTO patient (cccd, firstname, surname, gender, dateOfBirth, address, phoneNumber) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+	    try (Connection conn = DatabaseConnection.connect();
+	         PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        stmt.setString(1, this.cccd); // Sử dụng `this` để truy cập thuộc tính của đối tượng
+	        stmt.setString(2, this.firstname);
+	        stmt.setString(3, this.surname);
+	        stmt.setString(4, this.gender);
+	        stmt.setString(5, this.dateOfBirth);
+	        stmt.setString(6, this.address);
+	        stmt.setString(7, this.phoneNumber);
+
+	        return stmt.executeUpdate() > 0; // Trả về `true` nếu thêm thành công
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        JOptionPane.showMessageDialog(null, "Lỗi: " + e.getMessage());
+	        return false; // Trả về `false` nếu có lỗi
+	    }
+	}
+
 
 }
