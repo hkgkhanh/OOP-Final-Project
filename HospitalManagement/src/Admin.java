@@ -497,7 +497,6 @@ public class Admin extends Staff {
                 }
             });
 
-            // Gán sự kiện cho nút xóa
             deleteButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
