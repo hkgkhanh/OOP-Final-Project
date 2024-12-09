@@ -346,6 +346,7 @@ public class Admin extends Staff {
             
             // Add labels for patient information
             JLabel nameLabel = new JLabel("Họ và Tên: " + patient.getSurname() + " " + patient.getFirstname());
+            JLabel cccdLabel = new JLabel("CCCD/CMTND: " + patient.getCccd());
             JLabel genderLabel = new JLabel("Giới tính: " + patient.getGender());
             JLabel dateOfBirthLabel = new JLabel("Ngày sinh: " + patient.getDateOfBirth());
             JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + patient.getPhoneNumber());
@@ -375,6 +376,7 @@ public class Admin extends Staff {
 
             // Add all components to the patient panel
             patientPanel.add(nameLabel);
+            patientPanel.add(cccdLabel);
             patientPanel.add(genderLabel);
             patientPanel.add(dateOfBirthLabel);
             patientPanel.add(phoneNumberLabel);
@@ -416,43 +418,103 @@ public class Admin extends Staff {
         return doctors;
     }
 
+//    private void displayDoctors(JPanel panel) {
+//        panel.removeAll(); // Clear any existing content
+//
+//        List<Doctor> doctors = getDoctorData();
+//        for (Doctor doctor : doctors) {
+//            JPanel doctorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//            
+//            JLabel nameLabel = new JLabel(doctor.getSurname() + " " + doctor.getFirstname());
+//            JLabel phoneNumberLabel = new JLabel(doctor.getPhoneNumber());
+//            JLabel emailLabel = new JLabel(doctor.getEmail());
+//            JButton editButton = new JButton("Sửa");
+//            JButton deleteButton = new JButton("Xóa");
+//
+//            // Set button action listeners
+//            editButton.addMouseListener(new MouseAdapter() {
+//                public void mouseClicked(MouseEvent e) {
+////                    editPatient(patient); // Define this method to edit patient data
+//                }
+//            });
+//
+//            deleteButton.addMouseListener(new MouseAdapter() {
+//                public void mouseClicked(MouseEvent e) {
+////                    deletePatient(patient.getId()); // Define this method to delete patient
+//                    displayDoctors(panel); // Refresh display after deletion
+//                }
+//            });
+//
+//            // Add components to the patient panel
+//            doctorPanel.add(nameLabel);
+//            doctorPanel.add(phoneNumberLabel);
+//            doctorPanel.add(emailLabel);
+//            doctorPanel.add(editButton);
+//            doctorPanel.add(deleteButton);
+//
+//            // Add patient panel to main panel
+//            panel.add(doctorPanel);
+//        }
+//
+//        panel.revalidate();
+//        panel.repaint();
+//    }
     private void displayDoctors(JPanel panel) {
-        panel.removeAll(); // Clear any existing content
+        panel.removeAll(); // Xóa toàn bộ nội dung hiện tại của panel
 
-        List<Doctor> doctors = getDoctorData();
+        List<Doctor> doctors = getDoctorData(); // Lấy danh sách bác sĩ từ cơ sở dữ liệu
+
         for (Doctor doctor : doctors) {
-            JPanel doctorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            
-            JLabel nameLabel = new JLabel(doctor.getSurname() + " " + doctor.getFirstname());
+            JPanel doctorPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
+            doctorPanel.setLayout(new BoxLayout(doctorPanel, BoxLayout.Y_AXIS)); // Sử dụng BoxLayout theo chiều dọc
+
+            // Thêm các thông tin của bác sĩ vào panel
+            JLabel nameLabel = new JLabel("Họ và Tên: " + doctor.getSurname() + " " + doctor.getFirstname());
+            JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + doctor.getPhoneNumber());
+            JLabel emailLabel = new JLabel("Email: " + doctor.getEmail());
+            JLabel facultyLabel = new JLabel("Khoa: " + doctor.getFaculty());
+            JLabel joinDateLabel = new JLabel("Ngày tham gia: " + doctor.getJoinDate());
+
+            // Panel chứa nút sửa và xóa
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
-            // Set button action listeners
+            // Gán sự kiện cho nút sửa
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    editPatient(patient); // Define this method to edit patient data
+//                    editDoctor(doctor, panel); // Gọi hàm chỉnh sửa bác sĩ
                 }
             });
 
+            // Gán sự kiện cho nút xóa
             deleteButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    deletePatient(patient.getId()); // Define this method to delete patient
-                    displayDoctors(panel); // Refresh display after deletion
+//                    deleteDoctor(doctor.getId()); // Xóa bác sĩ theo ID
+                    displayDoctors(panel); // Làm mới danh sách sau khi xóa
                 }
             });
 
-            // Add components to the patient panel
-            doctorPanel.add(nameLabel);
-            doctorPanel.add(editButton);
-            doctorPanel.add(deleteButton);
+            // Thêm các nút vào buttonPanel
+            buttonPanel.add(editButton);
+            buttonPanel.add(deleteButton);
 
-            // Add patient panel to main panel
+            // Thêm các thành phần vào doctorPanel
+            doctorPanel.add(nameLabel);
+            doctorPanel.add(phoneNumberLabel);
+            doctorPanel.add(emailLabel);
+            doctorPanel.add(facultyLabel);
+            doctorPanel.add(joinDateLabel);
+            doctorPanel.add(buttonPanel);
+
+            // Thêm doctorPanel vào panel chính
             panel.add(doctorPanel);
         }
 
-        panel.revalidate();
-        panel.repaint();
+        panel.revalidate(); // Làm mới giao diện
+        panel.repaint();    // Vẽ lại giao diện
     }
+
     
     private List<MedicalRecord> getRecordData() {
         List<MedicalRecord> records = new ArrayList<>();
