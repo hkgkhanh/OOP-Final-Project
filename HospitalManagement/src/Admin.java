@@ -210,9 +210,9 @@ public class Admin extends Staff {
 
         // Button panel with Add button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton addPatientButton = new JButton("Thêm bệnh nhân");
-        addPatientButton.setPreferredSize(new Dimension(150, 25));
-        buttonPanel.add(addPatientButton);
+        JButton addRecordButton = new JButton("Thêm bệnh án");
+        addRecordButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addRecordButton);
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -225,20 +225,20 @@ public class Admin extends Staff {
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Danh sách bệnh nhân
-        JPanel patientListPanel = new JPanel();
-        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
-        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
+        JPanel recordListPanel = new JPanel();
+        recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollablePatientsListPane = new JScrollPane(recordListPanel);
         scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
 
         // Hiển thị danh sách bệnh nhân ban đầu
-        displayPatients(patientListPanel);
+        displayRecords(recordListPanel);
 
         // Hành động nút thêm bệnh nhân
-        addPatientButton.addMouseListener(new MouseAdapter() {
+        addRecordButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                createPatientDialog(patientListPanel, countLabel, type);
+                createRecordDialog(recordListPanel, countLabel, type);
             }
         });
 
@@ -378,7 +378,6 @@ public class Admin extends Staff {
                     }
                 }
             });
-
 
             // Add components to button panel
             buttonPanel.add(editButton);
@@ -544,17 +543,12 @@ public class Admin extends Staff {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-//                int id = rs.getInt("recordID");
-//                String cccd = rs.getString("cccd");
-//                int doctorID = rs.getInt("doctorID");
-//                String dateOfVisit = rs.getString("dateOfVisit");
-//                records.add(new MedicalRecord(id, cccd, doctorID, dateOfVisit));
-            	int id = rs.getInt("recordID");
+            	String id = rs.getString("recordID");
             	String cccd = rs.getString("cccd");
-            	int doctorID = rs.getInt("doctorID");
+            	String doctorID = rs.getString("doctorID");
             	String diagnosis = rs.getString("diagnosis");
             	String treatment = rs.getString("treatment");
-            	String prescription = rs.getString("diagnosis");
+            	String prescription = rs.getString("prescription");
             	String dateOfVisit = rs.getString("dateOfVisit");
             	int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
             	String followUpDate = rs.getString("followUpDate");
@@ -574,30 +568,49 @@ public class Admin extends Staff {
 
         List<MedicalRecord> records = getRecordData();
         for (MedicalRecord record : records) {
-            JPanel recordPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        	JPanel recordPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
+        	recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
             
-            JLabel nameLabel = new JLabel(record.getCccd());
+            JLabel cccdLabel = new JLabel("CCCD: " + record.getCccd());
+            JLabel doctorIdLabel = new JLabel("Mã bác sĩ: " + record.getDoctorID());
+            JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
+            JLabel dateOfVisitLabel = new JLabel("Ngày khám: " + record.getDateOfVisit());
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
             // Set button action listeners
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-//                    editPatient(patient); // Define this method to edit patient data
+                    editRecord(record, panel); // Define this method to edit patient data
                 }
             });
 
             deleteButton.addMouseListener(new MouseAdapter() {
+                @Override
                 public void mouseClicked(MouseEvent e) {
-//                    deletePatient(patient.getId()); // Define this method to delete patient
-                    displayRecords(panel); // Refresh display after deletion
+                    int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa bệnh án này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        if (record.deleteRecord(record.getId())) {
+                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thành công!");
+                            displayRecords(panel); // Làm mới danh sách sau khi xóa
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thất bại!");
+                        }
+                    }
                 }
             });
+            
+            buttonPanel.add(editButton);
+            buttonPanel.add(deleteButton);
 
             // Add components to the patient panel
-            recordPanel.add(nameLabel);
-            recordPanel.add(editButton);
-            recordPanel.add(deleteButton);
+            recordPanel.add(cccdLabel);
+            recordPanel.add(doctorIdLabel);
+            recordPanel.add(diagnosisLabel);
+            recordPanel.add(dateOfVisitLabel);
+            recordPanel.add(buttonPanel);
 
             // Add patient panel to main panel
             panel.add(recordPanel);
@@ -872,5 +885,158 @@ public class Admin extends Staff {
         createDialog.setLocationRelativeTo(null);
         createDialog.setVisible(true);
     }
+    
+    public void createRecordDialog(JPanel recordListPanel, JLabel countLabel, String type) {
+        JDialog createDialog = new JDialog();
+        createDialog.setTitle("Thêm bệnh án mới");
+        createDialog.setSize(400, 600);
+        createDialog.setLayout(new BoxLayout(createDialog.getContentPane(), BoxLayout.Y_AXIS));
 
+        JTextField idField = new JTextField();
+        JTextField cccdField = new JTextField();
+        JTextField doctorIdField = new JTextField();
+        JTextField diagnosisField = new JTextField();
+        JTextField treatmentField = new JTextField();
+        JTextField prescriptionField = new JTextField();
+        JTextField dateOfVisitField = new JTextField();
+        JTextField followUpDateField = new JTextField();
+        JTextField noteField = new JTextField();
+
+        createDialog.add(new JLabel("Mã bệnh án:"));
+        createDialog.add(idField);
+        createDialog.add(new JLabel("CCCD:"));
+        createDialog.add(cccdField);
+        createDialog.add(new JLabel("Mã bác sĩ phụ trách:"));
+        createDialog.add(doctorIdField);
+        createDialog.add(new JLabel("Chẩn đoán:"));
+        createDialog.add(diagnosisField);
+        createDialog.add(new JLabel("Phác đồ điều trị:"));
+        createDialog.add(treatmentField);
+        createDialog.add(new JLabel("Kê đơn thuốc:"));
+        createDialog.add(prescriptionField);
+        createDialog.add(new JLabel("Ngày khám bệnh:"));
+        createDialog.add(dateOfVisitField);
+        createDialog.add(new JLabel("Ngày tái khám:"));
+        createDialog.add(followUpDateField);
+        createDialog.add(new JLabel("Ghi chú của bác sĩ:"));
+        createDialog.add(noteField);
+        
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        	    // Kiểm tra đầu vào
+        	    if (idField.getText().isEmpty() || cccdField.getText().isEmpty() || doctorIdField.getText().isEmpty() || 
+        	    	diagnosisField.getText().isEmpty() || treatmentField.getText().isEmpty() || prescriptionField.getText().isEmpty() || 
+        	    	dateOfVisitField.getText().isEmpty() || noteField.getText().isEmpty()) {
+        	        JOptionPane.showMessageDialog(null, "Vui lòng nhập đầy đủ thông tin!");
+        	        return;
+        	    }
+
+        	    // Tạo đối tượng Record
+        	    MedicalRecord record = new MedicalRecord(
+        	        idField.getText(),
+        	        cccdField.getText(),
+        	        doctorIdField.getText(),
+        	        diagnosisField.getText(),
+        	        treatmentField.getText(),
+        	        prescriptionField.getText(),
+        	        dateOfVisitField.getText(),
+        	        0,
+        	        followUpDateField.getText(),
+        	        noteField.getText()
+        	    );
+
+        	    // Gọi phương thức tạo record trong cơ sở dữ liệu
+        	    if (record.createRecord()) {
+        	        JOptionPane.showMessageDialog(null, "Thêm bệnh án thành công!");
+        	        createDialog.dispose();
+
+        	        // Cập nhật danh sách record
+        	        displayRecords(recordListPanel);
+
+        	        // Cập nhật countLabel
+        	        int updatedCount = getCountFromDatabase("medicalrecord");
+        	        countLabel.setText("Bệnh án (" + updatedCount + ")");
+        	    } else {
+        	        JOptionPane.showMessageDialog(null, "Thêm bệnh án thất bại!");
+        	    }
+        	}
+
+        });
+
+        createDialog.add(saveButton);
+
+        createDialog.setLocationRelativeTo(null);
+        createDialog.setVisible(true);
+    }
+
+    private void editRecord(MedicalRecord record, JPanel panel) {
+        // Tạo JDialog để sửa thông tin bệnh án
+        JDialog editDialog = new JDialog();
+        editDialog.setTitle("Chỉnh sửa thông tin bệnh án");
+        editDialog.setSize(400, 400);
+        editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS));
+
+        // Các trường thông tin của bệnh án
+        JLabel idLabel = new JLabel("ID: " + record.getId()); // Hiển thị ID, không cho phép chỉnh sửa
+        JTextField cccdField = new JTextField(record.getCccd());
+        JTextField doctorIdField = new JTextField(record.getDoctorID());
+        JTextField treatmentField = new JTextField(record.getTreatment());
+        JTextField prescriptionField = new JTextField(record.getPrescription());
+        JTextField dateOfVisitField = new JTextField(record.getDateOfVisit());
+        JTextField lengthOfHospitalStayField = new JTextField(Integer.toString(record.getLengthOfHospitalStay()));
+        JTextField followUpDateField = new JTextField(record.getFollowUpDate());
+        JTextField noteField = new JTextField(record.getNote());
+
+        // Thêm các thành phần vào dialog
+        editDialog.add(idLabel);
+        editDialog.add(new JLabel("CCCD của bệnh nhân:"));
+        editDialog.add(cccdField);
+        editDialog.add(new JLabel("Mã bác sĩ phụ trách:"));
+        editDialog.add(doctorIdField);
+        editDialog.add(new JLabel("Phương pháp điều trị:"));
+        editDialog.add(treatmentField);
+        editDialog.add(new JLabel("Kê đơn thuốc:"));
+        editDialog.add(prescriptionField);
+        editDialog.add(new JLabel("Ngày khám bệnh:"));
+        editDialog.add(dateOfVisitField);
+        editDialog.add(new JLabel("Số ngày nằm viện:"));
+        editDialog.add(lengthOfHospitalStayField);
+        editDialog.add(new JLabel("Ngày tái khám:"));
+        editDialog.add(followUpDateField);
+        editDialog.add(new JLabel("Ghi chú của bác sĩ:"));
+        editDialog.add(noteField);
+
+        // Nút lưu thay đổi
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Lưu thông tin bác sĩ đã chỉnh sửa
+                record.setCccd(cccdField.getText());
+                record.setDoctorID(doctorIdField.getText());
+                record.setTreatment(treatmentField.getText());
+                record.setPrescription(prescriptionField.getText());
+                record.setDateOfVisit(dateOfVisitField.getText());
+                record.setLengthOfHospitalStay(Integer.parseInt(lengthOfHospitalStayField.getText()));
+                record.setFollowUpDate(followUpDateField.getText());
+                record.setNote(noteField.getText());
+
+                // Cập nhật thông tin vào cơ sở dữ liệu
+                if (record.updateRecord()) {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                    editDialog.dispose(); // Đóng dialog sau khi lưu
+                    displayRecords(panel); // Cập nhật danh sách bác sĩ
+                } else {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                }
+            }
+        });
+
+        editDialog.add(saveButton); // Thêm nút lưu vào cuối dialog
+
+        editDialog.setLocationRelativeTo(null); // Hiển thị dialog ở giữa màn hình
+        editDialog.setVisible(true); // Hiển thị dialog
+    }
 }
