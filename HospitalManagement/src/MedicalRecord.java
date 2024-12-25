@@ -1,13 +1,11 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MedicalRecord {
+	private static final float bedFeePerDay = 500000;
 	private String id;
 	private String cccd;
 	private String doctorID;
@@ -18,6 +16,9 @@ public class MedicalRecord {
 	private int lengthOfHospitalStay; // số ngày nằm viện, 0 thì là ko nằm
 	private String followUpDate;
 	private String note;
+	private boolean paid;
+	
+	private float subTotalFee;
 	
 	public MedicalRecord(String id, String cccd, String doctorID, String diagnosis, String treatment, String prescription,
 			String dateOfVisit, int lengthOfHospitalStay, String followUpDate, String note) {
@@ -32,6 +33,24 @@ public class MedicalRecord {
 		this.lengthOfHospitalStay = lengthOfHospitalStay;
 		this.followUpDate = followUpDate;
 		this.note = note;
+		this.paid = false;
+	}
+	
+	public MedicalRecord(String id, String cccd, String doctorID, String diagnosis, String treatment, String prescription,
+			String dateOfVisit, int lengthOfHospitalStay, String followUpDate, String note, boolean paid, float subTotalFee) {
+//		super();
+		this.id = id;
+		this.cccd = cccd;
+		this.doctorID = doctorID;
+		this.diagnosis = diagnosis;
+		this.treatment = treatment;
+		this.prescription = prescription;
+		this.dateOfVisit = dateOfVisit;
+		this.lengthOfHospitalStay = lengthOfHospitalStay;
+		this.followUpDate = followUpDate;
+		this.note = note;
+		this.paid = paid;
+		this.subTotalFee = subTotalFee;
 	}
 
 	public String getId() {
@@ -114,8 +133,43 @@ public class MedicalRecord {
 		this.note = note;
 	}
 	
-	public int calcFee() { // cái này để sau nhé Sơn, mấy hôm nữa mình lên công thức
-		return 0;
+	public boolean getPaid() {
+		return paid;
+	}
+
+	public void setPaid(boolean paid) {
+		this.paid = paid;
+	}
+	
+	public float getSubTotalFee() {
+		return subTotalFee;
+	}
+
+	public void setSubTotalFee(float subTotalFee) {
+		this.subTotalFee = subTotalFee;
+	}
+	
+	public float calcFee() {
+		String sql = "SELECT insurancePayPercent FROM patient WHERE cccd = ?";
+		try (Connection conn = DatabaseConnection.connect();
+	        PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        stmt.setString(1, this.getCccd());
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            if (rs.next()) {
+	                float insurancePayPercent = rs.getFloat("insurancePayPercent");
+	                return (subTotalFee + lengthOfHospitalStay * bedFeePerDay) * (1 - insurancePayPercent / 100); // Kết quả chi phí sau khi tính toán
+	            } else {
+	                JOptionPane.showMessageDialog(null, "Không tìm thấy bệnh nhân có CCCD: " + this.getCccd());
+	                return -1;
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        JOptionPane.showMessageDialog(null, "Lỗi khi truy vấn cơ sở dữ liệu: " + e.getMessage());
+	        return -1;
+	    }
 	}
 	
 	public boolean createRecord() {
@@ -147,10 +201,10 @@ public class MedicalRecord {
     }
 	
 	public boolean updateRecord() {
-        String sql = "UPDATE medicalrecord SET cccd = ?, doctorID = ?, diagnosis = ?, treatment = ?, prescription = ?, dateOfVisit = ?, lengthOfHospitalStay = ?, followUpDate = ?, note = ? WHERE recordID = ?";
+        String sql = "UPDATE medicalrecord SET cccd = ?, doctorID = ?, diagnosis = ?, treatment = ?, prescription = ?, dateOfVisit = ?, lengthOfHospitalStay = ?, followUpDate = ?, note = ?, paid = ?, subTotalFee = ? WHERE recordID = ?";
 
         try (Connection conn = DatabaseConnection.connect();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, this.cccd);
             stmt.setString(2, this.doctorID);
             stmt.setString(3, this.diagnosis);
@@ -160,7 +214,9 @@ public class MedicalRecord {
             stmt.setInt(7, this.lengthOfHospitalStay);
             stmt.setString(8, this.followUpDate);
             stmt.setString(9, this.note);
-            stmt.setString(10, this.id);
+            stmt.setString(10, this.paid == true ? "1" : "0");
+            stmt.setString(11, Float.toString(this.subTotalFee));
+            stmt.setString(12, this.id);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {

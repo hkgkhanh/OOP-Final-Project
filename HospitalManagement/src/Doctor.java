@@ -373,7 +373,8 @@ public class Doctor extends Staff {
                 String dateOfBirth = rs.getString("dateOfBirth");
                 String address = rs.getString("address");
                 String phoneNumber = rs.getString("phoneNumber");
-                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber));
+                float insurancePayPercent = Float.parseFloat(rs.getString("insurancePayPercent"));
+                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber, insurancePayPercent));
             }
         } catch (SQLException e) {
             e.printStackTrace();

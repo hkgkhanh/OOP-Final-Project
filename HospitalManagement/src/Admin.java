@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 public class Admin extends Staff {
     
@@ -283,7 +285,8 @@ public class Admin extends Staff {
                 String dateOfBirth = rs.getString("dateOfBirth");
                 String address = rs.getString("address");
                 String phoneNumber = rs.getString("phoneNumber");
-                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber));
+                float insurancePayPercent = Float.parseFloat(rs.getString("insurancePayPercent"));
+                patients.add(new Patient(cccd, surname, firstname, gender, dateOfBirth, address, phoneNumber, insurancePayPercent));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -427,47 +430,6 @@ public class Admin extends Staff {
         return doctors;
     }
 
-//    private void displayDoctors(JPanel panel) {
-//        panel.removeAll(); // Clear any existing content
-//
-//        List<Doctor> doctors = getDoctorData();
-//        for (Doctor doctor : doctors) {
-//            JPanel doctorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//            
-//            JLabel nameLabel = new JLabel(doctor.getSurname() + " " + doctor.getFirstname());
-//            JLabel phoneNumberLabel = new JLabel(doctor.getPhoneNumber());
-//            JLabel emailLabel = new JLabel(doctor.getEmail());
-//            JButton editButton = new JButton("Sửa");
-//            JButton deleteButton = new JButton("Xóa");
-//
-//            // Set button action listeners
-//            editButton.addMouseListener(new MouseAdapter() {
-//                public void mouseClicked(MouseEvent e) {
-////                    editPatient(patient); // Define this method to edit patient data
-//                }
-//            });
-//
-//            deleteButton.addMouseListener(new MouseAdapter() {
-//                public void mouseClicked(MouseEvent e) {
-////                    deletePatient(patient.getId()); // Define this method to delete patient
-//                    displayDoctors(panel); // Refresh display after deletion
-//                }
-//            });
-//
-//            // Add components to the patient panel
-//            doctorPanel.add(nameLabel);
-//            doctorPanel.add(phoneNumberLabel);
-//            doctorPanel.add(emailLabel);
-//            doctorPanel.add(editButton);
-//            doctorPanel.add(deleteButton);
-//
-//            // Add patient panel to main panel
-//            panel.add(doctorPanel);
-//        }
-//
-//        panel.revalidate();
-//        panel.repaint();
-//    }
     private void displayDoctors(JPanel panel) {
         panel.removeAll(); // Xóa toàn bộ nội dung hiện tại của panel
 
@@ -553,7 +515,9 @@ public class Admin extends Staff {
             	int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
             	String followUpDate = rs.getString("followUpDate");
             	String note = rs.getString("note");
-            	records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note));
+            	boolean paid = rs.getString("paid").equals("1") ? true : false;
+            	float subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+            	records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note, paid, subTotalFee));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -575,6 +539,12 @@ public class Admin extends Staff {
             JLabel doctorIdLabel = new JLabel("Mã bác sĩ: " + record.getDoctorID());
             JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
             JLabel dateOfVisitLabel = new JLabel("Ngày khám: " + record.getDateOfVisit());
+            
+            @SuppressWarnings("deprecation")
+			Locale vnLocale = new Locale("vi", "VN"); 
+            NumberFormat vnCurrencyFormat = NumberFormat.getCurrencyInstance(vnLocale);
+            JLabel feeLabel = new JLabel("Viện phí: " + (record.getPaid() == false ? vnCurrencyFormat.format(record.calcFee()) : "Đã thanh toán"));
+            
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
@@ -610,6 +580,7 @@ public class Admin extends Staff {
             recordPanel.add(doctorIdLabel);
             recordPanel.add(diagnosisLabel);
             recordPanel.add(dateOfVisitLabel);
+            recordPanel.add(feeLabel);
             recordPanel.add(buttonPanel);
 
             // Add patient panel to main panel
@@ -636,9 +607,11 @@ public class Admin extends Staff {
         JTextField addressField = new JTextField(patient.getAddress());
         JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
         genderComboBox.setSelectedItem(patient.getGender());
+        JLabel insuranceLabel = new JLabel("Phần trăm BHYT chi trả: " + patient.getInsurancePayPercent());
 
         // Thêm các thành phần vào dialog (theo từng dòng)
         editDialog.add(cccdLabel);  // Hiển thị CCCD ở trên cùng, không cho phép chỉnh sửa
+        editDialog.add(insuranceLabel);
         editDialog.add(new JLabel("Họ:"));
         editDialog.add(lastNameField);
         editDialog.add(new JLabel("Tên:"));
@@ -755,6 +728,7 @@ public class Admin extends Staff {
         JTextField dateOfBirthField = new JTextField();
         JTextField phoneField = new JTextField();
         JTextField addressField = new JTextField();
+        JTextField insuranceField = new JTextField();
         JComboBox<String> genderComboBox = new JComboBox<>(new String[]{"Male", "Female"});
 
         createDialog.add(new JLabel("CCCD:"));
@@ -771,6 +745,8 @@ public class Admin extends Staff {
         createDialog.add(addressField);
         createDialog.add(new JLabel("Giới Tính:"));
         createDialog.add(genderComboBox);
+        createDialog.add(new JLabel("Phần trăm BHYT chi trả:"));
+        createDialog.add(insuranceField);
 
         JButton saveButton = new JButton("Lưu");
         saveButton.addMouseListener(new MouseAdapter() {
@@ -783,7 +759,8 @@ public class Admin extends Staff {
                     (String) genderComboBox.getSelectedItem(),
                     dateOfBirthField.getText(),
                     addressField.getText(),
-                    phoneField.getText()
+                    phoneField.getText(),
+                    Float.parseFloat(insuranceField.getText())
                 );
 
                 if (patient.createPatient()) {
@@ -975,7 +952,7 @@ public class Admin extends Staff {
         // Tạo JDialog để sửa thông tin bệnh án
         JDialog editDialog = new JDialog();
         editDialog.setTitle("Chỉnh sửa thông tin bệnh án");
-        editDialog.setSize(400, 400);
+        editDialog.setSize(400, 600);
         editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS));
 
         // Các trường thông tin của bệnh án
@@ -988,6 +965,9 @@ public class Admin extends Staff {
         JTextField lengthOfHospitalStayField = new JTextField(Integer.toString(record.getLengthOfHospitalStay()));
         JTextField followUpDateField = new JTextField(record.getFollowUpDate());
         JTextField noteField = new JTextField(record.getNote());
+        JTextField subTotalFeeField = new JTextField(Float.toString(record.getSubTotalFee()));
+        JComboBox<String> paidComboBox = new JComboBox<>(new String[]{"Đã thanh toán", "Chưa thanh toán"});
+        paidComboBox.setSelectedItem(record.getPaid() == true ? "Đã thanh toán" : "Chưa thanh toán");
 
         // Thêm các thành phần vào dialog
         editDialog.add(idLabel);
@@ -1007,6 +987,9 @@ public class Admin extends Staff {
         editDialog.add(followUpDateField);
         editDialog.add(new JLabel("Ghi chú của bác sĩ:"));
         editDialog.add(noteField);
+        editDialog.add(new JLabel("Chi phí khám chữa bệnh:"));
+        editDialog.add(subTotalFeeField);
+        editDialog.add(paidComboBox);
 
         // Nút lưu thay đổi
         JButton saveButton = new JButton("Lưu");
@@ -1022,6 +1005,8 @@ public class Admin extends Staff {
                 record.setLengthOfHospitalStay(Integer.parseInt(lengthOfHospitalStayField.getText()));
                 record.setFollowUpDate(followUpDateField.getText());
                 record.setNote(noteField.getText());
+                record.setSubTotalFee(Float.parseFloat(subTotalFeeField.getText()));
+                record.setPaid(((String) paidComboBox.getSelectedItem()) == "Đã thanh toán" ? true : false);
 
                 // Cập nhật thông tin vào cơ sở dữ liệu
                 if (record.updateRecord()) {

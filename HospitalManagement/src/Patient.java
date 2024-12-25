@@ -1,10 +1,6 @@
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -16,9 +12,10 @@ public class Patient {
     private String dateOfBirth;
     private String address;
     private String phoneNumber;
+    private float insurancePayPercent;
     private ArrayList<MedicalRecord> medicalRecords;
     
-	public Patient(String cccd, String surname, String firstname, String gender, String dateOfBirth, String address, String phoneNumber) {
+	public Patient(String cccd, String surname, String firstname, String gender, String dateOfBirth, String address, String phoneNumber, float insurancePayPercent) {
 		super();
 		this.cccd = cccd;
 		this.surname = surname;
@@ -27,6 +24,7 @@ public class Patient {
 		this.dateOfBirth = dateOfBirth;
 		this.address = address;
 		this.phoneNumber = phoneNumber;
+		this.insurancePayPercent = insurancePayPercent;
 	}
 
 	public String getSurname() {
@@ -84,13 +82,21 @@ public class Patient {
 	public void setMedicalRecords(ArrayList<MedicalRecord> medicalRecords) {
 		this.medicalRecords = medicalRecords;
 	}
+	
+	public float getInsurancePayPercent() {
+		return insurancePayPercent;
+	}
+
+	public void setInsurancePayPercent(float insurancePayPercent) {
+		this.insurancePayPercent = insurancePayPercent;
+	}
 
 	public String getCccd() {
 		return cccd;
 	}
 	
 	public boolean updatePatient() {
-	    String sql = "UPDATE patient SET firstname = ?, surname = ?, gender = ?, phoneNumber = ?, address = ? WHERE cccd = ?";
+	    String sql = "UPDATE patient SET firstname = ?, surname = ?, gender = ?, phoneNumber = ?, address = ?, insurancePayPercent = ? WHERE cccd = ?";
 
 	    try (Connection conn = DatabaseConnection.connect();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -100,7 +106,8 @@ public class Patient {
 	        stmt.setString(3, this.gender);
 	        stmt.setString(4, this.phoneNumber);
 	        stmt.setString(5, this.address);
-	        stmt.setString(6, this.cccd);
+	        stmt.setString(6, Float.toString(this.insurancePayPercent));
+	        stmt.setString(7, this.cccd);
 
 	        return stmt.executeUpdate() > 0;
 	    } catch (SQLException e) {
@@ -109,7 +116,7 @@ public class Patient {
 	    }
 	}
 	public boolean createPatient() {
-	    String sql = "INSERT INTO patient (cccd, firstname, surname, gender, dateOfBirth, address, phoneNumber) VALUES (?, ?, ?, ?, ?, ?, ?)";
+	    String sql = "INSERT INTO patient (cccd, firstname, surname, gender, dateOfBirth, address, phoneNumber, insurancePayPercent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 	    try (Connection conn = DatabaseConnection.connect();
 	         PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -121,6 +128,7 @@ public class Patient {
 	        stmt.setString(5, this.dateOfBirth);
 	        stmt.setString(6, this.address);
 	        stmt.setString(7, this.phoneNumber);
+	        stmt.setString(8, Float.toString(this.insurancePayPercent));
 
 	        return stmt.executeUpdate() > 0; // Trả về `true` nếu thêm thành công
 	    } catch (SQLException e) {
