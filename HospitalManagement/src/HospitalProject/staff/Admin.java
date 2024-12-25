@@ -355,7 +355,7 @@ public class Admin extends Staff {
             
             // Add labels for patient information
             JLabel nameLabel = new JLabel("Họ và Tên: " + patient.getSurname() + " " + patient.getFirstname());
-            JLabel cccdLabel = new JLabel("CCCD/CMTND: " + patient.getCccd());
+            JLabel cccdLabel = new JLabel("CCCD: " + patient.getCccd());
             JLabel genderLabel = new JLabel("Giới tính: " + patient.getGender());
             JLabel dateOfBirthLabel = new JLabel("Ngày sinh: " + patient.getDateOfBirth());
             JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + patient.getPhoneNumber());

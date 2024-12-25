@@ -261,8 +261,8 @@ public class Doctor extends Staff {
         
         dashboardFrame.setLayout(new GridLayout(1, 2, 10, 10)); // 1 row, 2 columns
 
-        JPanel patientPanel = createManagementPanel_Patient("Bệnh nhân", "patient");
         JPanel recordPanel = createManagementPanel_Record("Hồ sơ bệnh án", "medicalrecord");
+        JPanel patientPanel = createManagementPanel_Patient("Bệnh nhân", "patient", recordPanel);
 
         dashboardFrame.add(patientPanel);
         dashboardFrame.add(recordPanel);
@@ -271,7 +271,7 @@ public class Doctor extends Staff {
         dashboardFrame.setVisible(true);
     }
     
-    private JPanel createManagementPanel_Patient(String title, String type) {
+    private JPanel createManagementPanel_Patient(String title, String type, JPanel recordPanel) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
@@ -291,7 +291,7 @@ public class Doctor extends Staff {
         panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
 
         // Hiển thị danh sách bệnh nhân ban đầu
-        displayPatients(patientListPanel);
+        displayPatients(patientListPanel, recordPanel);
 
         return panel;
     }
@@ -343,7 +343,7 @@ public class Doctor extends Staff {
         return patients;
     }
 
-    private void displayPatients(JPanel panel) {
+    private void displayPatients(JPanel panel, JPanel recordPanel) {
         panel.removeAll(); // Clear any existing content
 
         List<Patient> patients = getPatientData();
@@ -362,6 +362,12 @@ public class Doctor extends Staff {
             patientPanel.add(genderLabel);
             patientPanel.add(dateOfBirthLabel);
             patientPanel.add(phoneNumberLabel);
+            
+            patientPanel.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                	displayRecords(recordPanel, patient);
+                }
+            });
 
             // Add patient panel to main panel
             patientPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -376,12 +382,6 @@ public class Doctor extends Staff {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
-        // Button panel with Add button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton addRecordButton = new JButton("Thêm bệnh án");
-        addRecordButton.setPreferredSize(new Dimension(150, 25));
-        buttonPanel.add(addRecordButton);
-
         // Count label
         JLabel countLabel = new JLabel();
         if (type != null) {
@@ -390,8 +390,6 @@ public class Doctor extends Staff {
             panel.add(countLabel, BorderLayout.NORTH);
         }
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-
         JPanel recordListPanel = new JPanel();        
         recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
@@ -399,14 +397,6 @@ public class Doctor extends Staff {
         panel.add(scrollableRecordsListPane, BorderLayout.CENTER);
 
         displayRecords(recordListPanel);
-
-        // Hành động nút thêm bệnh nhân
-        addRecordButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-//                createRecordDialog(recordListPanel, countLabel, type);
-            }
-        });
 
         return panel;
     }
@@ -460,6 +450,45 @@ public class Doctor extends Staff {
             // Add patient panel to main panel
             recordPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             panel.add(recordPanel);
+        }
+
+        panel.revalidate();
+        panel.repaint();
+    }
+    
+    private void displayRecords(JPanel panel, Patient patient) {
+    	JPanel recordListPanel = (JPanel) ((JScrollPane) panel.getComponents()[1]).getViewport().getView();
+    	recordListPanel.removeAll(); // Clear any existing content
+
+        List<MedicalRecord> records = getRecordData();
+        for (MedicalRecord record : records) {
+        	if (record.getCccd().equals(patient.getCccd())) {
+	        	JPanel recordPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
+	        	recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
+	            
+	            JLabel cccdLabel = new JLabel("CCCD: " + record.getCccd());
+	            JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
+	            JLabel dateOfVisitLabel = new JLabel("Ngày khám: " + record.getDateOfVisit());
+	                        
+	            JButton editButton = new JButton("Cập nhật bệnh án");
+	
+	            // Set button action listeners
+	            editButton.addMouseListener(new MouseAdapter() {
+	                public void mouseClicked(MouseEvent e) {
+	                    editRecord(record, recordListPanel); // Define this method to edit patient data
+	                }
+	            });
+	
+	            // Add components to the patient panel
+	            recordPanel.add(cccdLabel);
+	            recordPanel.add(diagnosisLabel);
+	            recordPanel.add(dateOfVisitLabel);
+	            recordPanel.add(editButton);
+	
+	            // Add patient panel to main panel
+	            recordPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+	            recordListPanel.add(recordPanel);
+        	}
         }
 
         panel.revalidate();
