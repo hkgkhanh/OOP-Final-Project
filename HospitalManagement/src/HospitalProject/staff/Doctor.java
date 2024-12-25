@@ -1,9 +1,8 @@
 package HospitalProject.staff;
 import javax.swing.*;
-
 import HospitalProject.dbController.DatabaseConnection;
+import HospitalProject.patient.MedicalRecord;
 import HospitalProject.patient.Patient;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -185,6 +184,7 @@ public class Doctor extends Staff {
                 if (authenticate(email, password)) {
 //                    JOptionPane.showMessageDialog(loginFrame, "Đăng nhập thành công.");
                     loginFrame.dispose(); // Close login window
+                    getThisDoctorData(email);
                     showDoctorDashboard(); // Open new window if login successful
                 } else {
                     JOptionPane.showMessageDialog(loginFrame, "Nhập email hoặc mật khẩu sai, hãy thử lại.");
@@ -218,6 +218,30 @@ public class Doctor extends Staff {
         return isAuthenticated;
     }
     
+    private void getThisDoctorData(String email) {
+    	String query = "SELECT * FROM doctor WHERE email = ?";
+    	
+    	try (Connection conn = DatabaseConnection.connect();
+    			PreparedStatement stmt = conn.prepareStatement(query)) {
+    		
+    		stmt.setString(1, email);
+    		ResultSet rs = stmt.executeQuery();
+    		
+    		while (rs.next()) {
+    			this.email = rs.getString("email");
+    			this.surname = rs.getString("surname");
+    			this.firstname = rs.getString("firstname");
+    			this.faculty = rs.getString("faculty");
+    			this.phoneNumber = rs.getString("phoneNumber");
+    			this.joinDate = rs.getString("joinDate");
+    		}
+    		
+    	} catch (SQLException e) {
+    		e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+    	}
+    }
+    
  // Method to show a new doctor dashboard window after successful login
     private void showDoctorDashboard() {
         JFrame dashboardFrame = new JFrame("Doctor Dashboard");
@@ -225,55 +249,33 @@ public class Doctor extends Staff {
         dashboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         // Navbar
+        JLabel welcomeLabel = new JLabel("Xin chào, Bác sĩ " + this.surname + " " + this.firstname + "!", SwingConstants.LEFT);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 14));
         JMenuBar menuBar = new JMenuBar();
-        JMenu menuPatient = new JMenu("Bệnh nhân");
-        JMenu menuAbout = new JMenu("Phòng");
         JMenu menuLogout = new JMenu("Đăng xuất");
-        menuBar.add(menuPatient);
-        menuBar.add(menuAbout);
-        menuBar.add(menuLogout);
+        JPanel menuPanel = new JPanel(new BorderLayout());
+        menuPanel.add(welcomeLabel, BorderLayout.WEST);
+        menuPanel.add(menuLogout, BorderLayout.EAST);
+        menuBar.add(menuPanel);
         dashboardFrame.setJMenuBar(menuBar);
         
-        JLabel welcomeLabel = new JLabel("Xin chào, " + surname + firstname + "!", SwingConstants.LEFT);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        
-//        dashboardFrame.add(welcomeLabel, BorderLayout.NORTH);
-        
-        dashboardFrame.setLayout(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns
+        dashboardFrame.setLayout(new GridLayout(1, 2, 10, 10)); // 1 row, 2 columns
 
-        // Panel for Patient Management
-        JPanel patientPanel = createManagementPanel("Bệnh nhân", "patient");
-        // Panel for Room Management (no count)
-        JPanel recordPanel = createManagementPanel("Hồ sơ bệnh án", "medicalrecord");
+        JPanel patientPanel = createManagementPanel_Patient("Bệnh nhân", "patient");
+//        JPanel recordPanel = createManagementPanel("Hồ sơ bệnh án", "medicalrecord");
 
         dashboardFrame.add(patientPanel);
-        dashboardFrame.add(recordPanel);
+//        dashboardFrame.add(recordPanel);
         
         dashboardFrame.setLocationRelativeTo(null); // Center the window
         dashboardFrame.setVisible(true);
     }
     
-    private JPanel createManagementPanel(String title, String type) {
+    private JPanel createManagementPanel_Patient(String title, String type) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        JButton addButton = new JButton("Thêm bản ghi");
-//        JButton editButton = new JButton("Sửa");
-//        JButton deleteButton = new JButton("Xóa");
-        
-        // Set preferred size for the buttons
-        Dimension buttonSize = new Dimension(150, 25); // Adjust size as needed
-        addButton.setPreferredSize(buttonSize);
-//        editButton.setPreferredSize(buttonSize);
-//        deleteButton.setPreferredSize(buttonSize);
-
-        buttonPanel.add(addButton);
-//        buttonPanel.add(editButton);
-//        buttonPanel.add(deleteButton);
-
-        // Count label (only for patient and doctor)
+        // Count label
         JLabel countLabel = new JLabel();
         if (type != null) {
             int count = getCountFromDatabase(type);
@@ -281,63 +283,15 @@ public class Doctor extends Staff {
             panel.add(countLabel, BorderLayout.NORTH);
         }
 
-        panel.add(buttonPanel, BorderLayout.SOUTH);
+        // Danh sách bệnh nhân
+        JPanel patientListPanel = new JPanel();
+        patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
+        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
 
-        // Example ActionListeners for buttons (you may want to define actual logic)
-        addButton.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                JOptionPane.showMessageDialog(null, "Thêm " + title);
-            }
-        });
-
-//        editButton.addMouseListener(new MouseAdapter() {
-//            public void mouseClicked(MouseEvent e) {
-//                JOptionPane.showMessageDialog(null, "Sửa " + title);
-//            }
-//        });
-//
-//        deleteButton.addMouseListener(new MouseAdapter() {
-//            public void mouseClicked(MouseEvent e) {
-//                JOptionPane.showMessageDialog(null, "Xóa " + title);
-//            }
-//        });
-        
-        // Table for displaying patient records
-        if (title.equals("Bệnh nhân")) {
-//	        String[] columnNames = {"ID", "Họ tên"};
-//	        Object[][] data = getPatientData(); // Get patient data from the database
-//	
-//	        JTable patientTable = new JTable(data, columnNames);
-//	        JScrollPane scrollPane = new JScrollPane(patientTable);
-//	        patientTable.setFillsViewportHeight(true); // Ensure the table fills the viewport
-//	
-//	        panel.add(scrollPane, BorderLayout.CENTER); // Add the table to the center of the panel
-        	
-        	// Inside showAdminDashboard or createManagementPanel
-        	JPanel patientListPanel = new JPanel();
-        	patientListPanel.setLayout(new BoxLayout(patientListPanel, BoxLayout.Y_AXIS));
-        	displayPatients(patientListPanel); // Populate with patient records
-        	
-        	// Wrap the patientListPanel in a JScrollPane
-        	JScrollPane scrollablePatientsListPane = new JScrollPane(patientListPanel);
-        	scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        	// Add to main dashboard
-        	panel.add(scrollablePatientsListPane);
-
-        } else if (title.equals("Hồ sơ bệnh án")) {
-        	// Inside showAdminDashboard or createManagementPanel
-        	JPanel recordListPanel = new JPanel();
-        	recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
-//        	displayRecords(recordListPanel); // Populate with patient records
-        	
-        	// Wrap the patientListPanel in a JScrollPane
-        	JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
-        	scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
-        	// Add to main dashboard
-        	panel.add(scrollableRecordsListPane);
-        }
+        // Hiển thị danh sách bệnh nhân ban đầu
+        displayPatients(patientListPanel);
 
         return panel;
     }
@@ -345,7 +299,8 @@ public class Doctor extends Staff {
     // Method to get the count from the database
     private int getCountFromDatabase(String tableName) {
         int count = 0;
-        String query = "SELECT COUNT(*) FROM " + tableName;
+//        String query = "SELECT COUNT(*) FROM " + tableName + " WHERE doctorID";
+        String query = "SELECT COUNT(*) FROM patient p JOIN medicalrecord mr ON p.cccd = mr.cccd JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query);
