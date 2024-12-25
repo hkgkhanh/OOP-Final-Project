@@ -521,8 +521,16 @@ public class Admin extends Staff {
             	int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
             	String followUpDate = rs.getString("followUpDate");
             	String note = rs.getString("note");
-            	boolean paid = rs.getString("paid").equals("1") ? true : false;
-            	float subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+            	boolean paid;
+            	if (rs.getString("paid") == null) {
+            		paid = false;
+            	} else {
+            		paid = rs.getString("paid").equals("1") ? true : false;
+            	}
+            	float subTotalFee = 0;
+            	if (rs.getString("subTotalFee") != null) {
+            		subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+            	}
             	records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note, paid, subTotalFee));
             }
         } catch (SQLException e) {
@@ -958,7 +966,7 @@ public class Admin extends Staff {
         // Tạo JDialog để sửa thông tin bệnh án
         JDialog editDialog = new JDialog();
         editDialog.setTitle("Chỉnh sửa thông tin bệnh án");
-        editDialog.setSize(400, 600);
+        editDialog.setSize(400, 500);
         editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS));
 
         // Các trường thông tin của bệnh án

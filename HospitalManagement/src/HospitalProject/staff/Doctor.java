@@ -262,10 +262,10 @@ public class Doctor extends Staff {
         dashboardFrame.setLayout(new GridLayout(1, 2, 10, 10)); // 1 row, 2 columns
 
         JPanel patientPanel = createManagementPanel_Patient("Bệnh nhân", "patient");
-//        JPanel recordPanel = createManagementPanel("Hồ sơ bệnh án", "medicalrecord");
+        JPanel recordPanel = createManagementPanel_Record("Hồ sơ bệnh án", "medicalrecord");
 
         dashboardFrame.add(patientPanel);
-//        dashboardFrame.add(recordPanel);
+        dashboardFrame.add(recordPanel);
         
         dashboardFrame.setLocationRelativeTo(null); // Center the window
         dashboardFrame.setVisible(true);
@@ -278,7 +278,7 @@ public class Doctor extends Staff {
         // Count label
         JLabel countLabel = new JLabel();
         if (type != null) {
-            int count = getCountFromDatabase(type);
+            int count = getPatientCountFromDatabase();
             countLabel.setText(title + " (" + count + ")");
             panel.add(countLabel, BorderLayout.NORTH);
         }
@@ -297,10 +297,9 @@ public class Doctor extends Staff {
     }
     
     // Method to get the count from the database
-    private int getCountFromDatabase(String tableName) {
+    private int getPatientCountFromDatabase() {
         int count = 0;
-//        String query = "SELECT COUNT(*) FROM " + tableName + " WHERE doctorID";
-        String query = "SELECT COUNT(*) FROM patient p JOIN medicalrecord mr ON p.cccd = mr.cccd JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
+        String query = "SELECT COUNT(DISTINCT p.cccd) FROM patient p JOIN medicalrecord mr ON p.cccd = mr.cccd JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -319,7 +318,7 @@ public class Doctor extends Staff {
     
     private List<Patient> getPatientData() {
         List<Patient> patients = new ArrayList<>();
-        String query = "SELECT * FROM patient";
+        String query = "SELECT DISTINCT p.* FROM patient p JOIN medicalrecord mr ON p.cccd = mr.cccd JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -349,36 +348,219 @@ public class Doctor extends Staff {
 
         List<Patient> patients = getPatientData();
         for (Patient patient : patients) {
-            JPanel patientPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        	JPanel patientPanel = new JPanel();
+            patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS)); // Set layout to BoxLayout.Y_AXIS
             
-            JLabel nameLabel = new JLabel(patient.getSurname() + " " + patient.getFirstname());
-            JButton editButton = new JButton("Sửa");
-            JButton deleteButton = new JButton("Xóa");
+            // Add labels for patient information
+            JLabel nameLabel = new JLabel("Họ và Tên: " + patient.getSurname() + " " + patient.getFirstname());
+            JLabel genderLabel = new JLabel("Giới tính: " + patient.getGender());
+            JLabel dateOfBirthLabel = new JLabel("Ngày sinh: " + patient.getDateOfBirth());
+            JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + patient.getPhoneNumber());
 
-            // Set button action listeners
-            editButton.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-//                    editPatient(patient); // Define this method to edit patient data
-                }
-            });
-
-            deleteButton.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-//                    deletePatient(patient.getId()); // Define this method to delete patient
-                    displayPatients(panel); // Refresh display after deletion
-                }
-            });
-
-            // Add components to the patient panel
+            // Add all components to the patient panel
             patientPanel.add(nameLabel);
-            patientPanel.add(editButton);
-            patientPanel.add(deleteButton);
+            patientPanel.add(genderLabel);
+            patientPanel.add(dateOfBirthLabel);
+            patientPanel.add(phoneNumberLabel);
 
             // Add patient panel to main panel
+            patientPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             panel.add(patientPanel);
         }
 
         panel.revalidate();
         panel.repaint();
+    }
+    
+    private JPanel createManagementPanel_Record(String title, String type) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(10, 10));
+
+        // Button panel with Add button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JButton addRecordButton = new JButton("Thêm bệnh án");
+        addRecordButton.setPreferredSize(new Dimension(150, 25));
+        buttonPanel.add(addRecordButton);
+
+        // Count label
+        JLabel countLabel = new JLabel();
+        if (type != null) {
+            int count = getRecordCountFromDatabase();
+            countLabel.setText(title + " (" + count + ")");
+            panel.add(countLabel, BorderLayout.NORTH);
+        }
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+
+        JPanel recordListPanel = new JPanel();        
+        recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
+        scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollableRecordsListPane, BorderLayout.CENTER);
+
+        displayRecords(recordListPanel);
+
+        // Hành động nút thêm bệnh nhân
+        addRecordButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+//                createRecordDialog(recordListPanel, countLabel, type);
+            }
+        });
+
+        return panel;
+    }
+    
+    private int getRecordCountFromDatabase() {
+        int count = 0;
+        String query = "SELECT COUNT(*) FROM medicalrecord mr JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                count = rs.getInt(1); // Get the count from the first column
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+
+        return count;
+    }
+    
+    private void displayRecords(JPanel panel) {
+        panel.removeAll(); // Clear any existing content
+
+        List<MedicalRecord> records = getRecordData();
+        for (MedicalRecord record : records) {
+        	JPanel recordPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
+        	recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
+            
+            JLabel cccdLabel = new JLabel("CCCD: " + record.getCccd());
+            JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
+            JLabel dateOfVisitLabel = new JLabel("Ngày khám: " + record.getDateOfVisit());
+                        
+            JButton editButton = new JButton("Cập nhật bệnh án");
+
+            // Set button action listeners
+            editButton.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    editRecord(record, panel); // Define this method to edit patient data
+                }
+            });
+
+            // Add components to the patient panel
+            recordPanel.add(cccdLabel);
+            recordPanel.add(diagnosisLabel);
+            recordPanel.add(dateOfVisitLabel);
+            recordPanel.add(editButton);
+
+            // Add patient panel to main panel
+            recordPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+            panel.add(recordPanel);
+        }
+
+        panel.revalidate();
+        panel.repaint();
+    }
+    
+    private List<MedicalRecord> getRecordData() {
+        List<MedicalRecord> records = new ArrayList<>();
+        String query = "SELECT mr.* FROM medicalrecord mr JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+            	String id = rs.getString("recordID");
+            	String cccd = rs.getString("cccd");
+            	String doctorID = rs.getString("doctorID");
+            	String diagnosis = rs.getString("diagnosis");
+            	String treatment = rs.getString("treatment");
+            	String prescription = rs.getString("prescription");
+            	String dateOfVisit = rs.getString("dateOfVisit");
+            	int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
+            	String followUpDate = rs.getString("followUpDate");
+            	String note = rs.getString("note");
+            	boolean paid;
+            	if (rs.getString("paid") == null) {
+            		paid = false;
+            	} else {
+            		paid = rs.getString("paid").equals("1") ? true : false;
+            	}
+            	float subTotalFee = 0;
+            	if (rs.getString("subTotalFee") != null) {
+            		subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+            	}
+            	records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note, paid, subTotalFee));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+
+        return records;
+    }
+    
+    private void editRecord(MedicalRecord record, JPanel panel) {
+        // Tạo JDialog để sửa thông tin bệnh án
+        JDialog editDialog = new JDialog();
+        editDialog.setTitle("Chỉnh sửa thông tin bệnh án");
+        editDialog.setSize(400, 500);
+        editDialog.setLayout(new BoxLayout(editDialog.getContentPane(), BoxLayout.Y_AXIS));
+
+        // Các trường thông tin của bệnh án
+        JTextField treatmentField = new JTextField(record.getTreatment());
+        JTextField prescriptionField = new JTextField(record.getPrescription());
+        JTextField dateOfVisitField = new JTextField(record.getDateOfVisit());
+        JTextField lengthOfHospitalStayField = new JTextField(Integer.toString(record.getLengthOfHospitalStay()));
+        JTextField followUpDateField = new JTextField(record.getFollowUpDate());
+        JTextField noteField = new JTextField(record.getNote());
+
+        // Thêm các thành phần vào dialog
+        editDialog.add(new JLabel("Phương pháp điều trị:"));
+        editDialog.add(treatmentField);
+        editDialog.add(new JLabel("Kê đơn thuốc:"));
+        editDialog.add(prescriptionField);
+        editDialog.add(new JLabel("Ngày khám bệnh:"));
+        editDialog.add(dateOfVisitField);
+        editDialog.add(new JLabel("Số ngày nằm viện:"));
+        editDialog.add(lengthOfHospitalStayField);
+        editDialog.add(new JLabel("Ngày tái khám:"));
+        editDialog.add(followUpDateField);
+        editDialog.add(new JLabel("Ghi chú của bác sĩ:"));
+        editDialog.add(noteField);
+
+        // Nút lưu thay đổi
+        JButton saveButton = new JButton("Lưu");
+        saveButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Lưu thông tin bác sĩ đã chỉnh sửa
+                record.setTreatment(treatmentField.getText());
+                record.setPrescription(prescriptionField.getText());
+                record.setDateOfVisit(dateOfVisitField.getText());
+                record.setLengthOfHospitalStay(Integer.parseInt(lengthOfHospitalStayField.getText()));
+                record.setFollowUpDate(followUpDateField.getText());
+                record.setNote(noteField.getText());
+
+                // Cập nhật thông tin vào cơ sở dữ liệu
+                if (record.updateRecord()) {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                    editDialog.dispose(); // Đóng dialog sau khi lưu
+                    displayRecords(panel); // Cập nhật danh sách bác sĩ
+                } else {
+                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                }
+            }
+        });
+
+        editDialog.add(saveButton); // Thêm nút lưu vào cuối dialog
+
+        editDialog.setLocationRelativeTo(null); // Hiển thị dialog ở giữa màn hình
+        editDialog.setVisible(true); // Hiển thị dialog
     }
 }
