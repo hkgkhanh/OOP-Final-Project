@@ -386,15 +386,25 @@ public class Doctor extends Staff {
         // Thêm thanh tìm kiếm và các nút
         JTextField searchField = new JTextField();
         searchField.setPreferredSize(new Dimension(150, 25));
-        JButton searchButton = new JButton("Tìm kiếm");
-        searchButton.setPreferredSize(new Dimension(100, 25));
+        JButton searchCCCDButton = new JButton("Tìm kiếm theo CCCD");
+        searchCCCDButton.setPreferredSize(new Dimension(180, 25));
         JButton resetButton = new JButton("Trở lại ban đầu");
         resetButton.setPreferredSize(new Dimension(150, 25));
 
+        // Thêm thanh tìm kiếm theo tên
+        JTextField searchNameField = new JTextField();
+        searchNameField.setPreferredSize(new Dimension(150, 25));
+        JButton searchNameButton = new JButton("Tìm kiếm theo tên");
+        searchNameButton.setPreferredSize(new Dimension(180, 25));
+
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.add(searchField);
-        searchPanel.add(searchButton);
+        searchPanel.add(searchCCCDButton);
         searchPanel.add(resetButton);
+
+        JPanel searchNamePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        searchNamePanel.add(searchNameField);
+        searchNamePanel.add(searchNameButton);
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -411,16 +421,26 @@ public class Doctor extends Staff {
         scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollableRecordsListPane); // Thêm scrollableRecordsListPane vào panel chính
         panel.add(searchPanel); // Thêm searchPanel vào panel chính
+        panel.add(searchNamePanel); // Thêm searchNamePanel vào panel chính
 
         List<MedicalRecord> records = getRecordData();
         displayRecords(recordListPanel, records); // Gọi hàm với 2 tham số
 
-        // Xử lý sự kiện cho nút tìm kiếm
-        searchButton.addActionListener(new ActionListener() {
+        // Xử lý sự kiện cho nút tìm kiếm theo CCCD
+        searchCCCDButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String cccd = searchField.getText();
                 searchRecordByCCCD(recordListPanel, cccd);
+            }
+        });
+
+        // Xử lý sự kiện cho nút tìm kiếm theo tên
+        searchNameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String name = searchNameField.getText();
+                searchRecordByName(recordListPanel, name);
             }
         });
 
@@ -538,7 +558,67 @@ public class Doctor extends Staff {
             JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
         }
     }
-    
+    private void searchRecordByName(JPanel recordListPanel, String name) {
+        List<MedicalRecord> records = new ArrayList<>();
+        String query = "SELECT mr.* " +
+                "FROM medicalrecord mr " +
+                "JOIN patient p ON mr.cccd = p.cccd " +
+                "WHERE (p.firstname LIKE ? OR p.surname LIKE ?) " + 
+                "OR (p.firstname LIKE ? AND p.surname LIKE ?) " +
+                "OR (p.surname LIKE ? AND p.firstname LIKE ?)";;
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Tách tên thành các phần
+            String[] nameParts = name.split(" ");
+            String firstName = nameParts[0];
+            String lastName = nameParts[nameParts.length - 1];
+
+            // Gán giá trị cho các tham số
+            stmt.setString(1, "%" + firstName + "%");
+            stmt.setString(2, "%" + lastName + "%");
+            stmt.setString(3, "%" + firstName + "%");
+            stmt.setString(4, "%" + lastName + "%");
+            stmt.setString(5, "%" + firstName + "%");
+            stmt.setString(6, "%" + lastName + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(null, "Không tìm thấy bệnh án của bệnh nhân có tên: " + name);
+            } else {
+                do {
+                    String id = rs.getString("recordID");
+                    String cccd = rs.getString("cccd");
+                    String doctorID = rs.getString("doctorID");
+                    String diagnosis = rs.getString("diagnosis");
+                    String treatment = rs.getString("treatment");
+                    String prescription = rs.getString("prescription");
+                    String dateOfVisit = rs.getString("dateOfVisit");
+                    int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
+                    String followUpDate = rs.getString("followUpDate");
+                    String note = rs.getString("note");
+                    boolean paid;
+                    if (rs.getString("paid") == null) {
+                        paid = false;
+                    } else {
+                        paid = rs.getString("paid").equals("1") ? true : false;
+                    }
+                    float subTotalFee = 0;
+                    if (rs.getString("subTotalFee") != null) {
+                        subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+                    }
+                    records.add(new MedicalRecord(id, cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note, paid, subTotalFee));
+                } while (rs.next());
+
+                displayRecords(recordListPanel, records); // Hiển thị danh sách bệnh án tìm được
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+    }
     private int getRecordCountFromDatabase() {
         int count = 0;
         String query = "SELECT COUNT(*) FROM medicalrecord mr JOIN doctor d ON mr.doctorID = d.doctorID WHERE d.email = '" + this.email + "'";
@@ -559,12 +639,16 @@ public class Doctor extends Staff {
     }
     
     private void displayRecords(JPanel panel, List<MedicalRecord> records) {
-        panel.removeAll(); // Xóa nội dung hiện tại của panel
+        panel.removeAll();
 
-        // Duyệt qua danh sách records và hiển thị thông tin
         for (MedicalRecord record : records) {
             JPanel recordPanel = new JPanel();
             recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
+
+            // Lấy tên bệnh nhân từ cccd
+            String patientName = getPatientName(record.getCccd());
+            JLabel nameLabel = new JLabel("Tên bệnh nhân: " + patientName); // Hiển thị tên bệnh nhân
+            recordPanel.add(nameLabel);
 
             JLabel cccdLabel = new JLabel("CCCD: " + record.getCccd());
             JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
@@ -572,7 +656,6 @@ public class Doctor extends Staff {
                       
             JButton editButton = new JButton("Cập nhật bệnh án");
 
-            // Set button action listeners
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
                     editRecord(record, panel);
@@ -584,7 +667,6 @@ public class Doctor extends Staff {
             recordPanel.add(dateOfVisitLabel);
             recordPanel.add(editButton);
 
-            // Add patient panel to main panel
             recordPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
             panel.add(recordPanel);
         }
@@ -671,6 +753,28 @@ public class Doctor extends Staff {
         return records;
     }
     
+    private String getPatientName(String cccd) {
+        String name = "";
+        String query = "SELECT firstname, surname FROM patient WHERE cccd = ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, cccd);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                name = rs.getString("surname") + " " + rs.getString("firstname");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+
+        return name;
+    }
+    
     private void editRecord(MedicalRecord record, JPanel panel) {
         // Tạo JDialog để sửa thông tin bệnh án
         JDialog editDialog = new JDialog();
@@ -731,3 +835,4 @@ public class Doctor extends Staff {
         editDialog.setVisible(true); // Hiển thị dialog
     }
 }
+
