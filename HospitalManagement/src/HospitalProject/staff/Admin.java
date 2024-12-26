@@ -97,21 +97,22 @@ public class Admin extends Staff {
         dashboardFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         
         // Navbar
+        JLabel welcomeLabel = new JLabel("Xin chào, " + this.id + "!", SwingConstants.LEFT);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 14));
         JMenuBar menuBar = new JMenuBar();
-        JMenu menuPatient = new JMenu("Bệnh nhân");
-        JMenu menuDoctor = new JMenu("Bác sĩ");
-        JMenu menuAbout = new JMenu("Phòng");
         JMenu menuLogout = new JMenu("Đăng xuất");
-        menuBar.add(menuPatient);
-        menuBar.add(menuDoctor);
-        menuBar.add(menuAbout);
-        menuBar.add(menuLogout);
+        JPanel menuPanel = new JPanel(new BorderLayout());
+        menuPanel.add(welcomeLabel, BorderLayout.WEST);
+        menuPanel.add(menuLogout, BorderLayout.EAST);
+        menuBar.add(menuPanel);
         dashboardFrame.setJMenuBar(menuBar);
         
-        JLabel welcomeLabel = new JLabel("Xin chào, " + id + "!", SwingConstants.LEFT);
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        
-//        dashboardFrame.add(welcomeLabel, BorderLayout.NORTH);
+        menuLogout.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dashboardFrame.dispose();
+            }
+        });
         
         dashboardFrame.setLayout(new GridLayout(1, 3, 10, 10)); // 1 row, 3 columns
 
@@ -901,7 +902,7 @@ public class Admin extends Staff {
     public void createPatientDialog(JPanel patientListPanel, JLabel countLabel, String type) {
         JDialog createDialog = new JDialog();
         createDialog.setTitle("Thêm bệnh nhân mới");
-        createDialog.setSize(400, 350);
+        createDialog.setSize(400, 400);
         createDialog.setLayout(new BoxLayout(createDialog.getContentPane(), BoxLayout.Y_AXIS));
 
         JTextField cccdField = new JTextField();

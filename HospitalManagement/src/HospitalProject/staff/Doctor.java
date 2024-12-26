@@ -260,6 +260,13 @@ public class Doctor extends Staff {
         menuBar.add(menuPanel);
         dashboardFrame.setJMenuBar(menuBar);
         
+        menuLogout.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dashboardFrame.dispose();
+            }
+        });
+        
         dashboardFrame.setLayout(new GridLayout(1, 2, 10, 10)); // 1 row, 2 columns
 
         JPanel recordPanel = createManagementPanel_Record("Hồ sơ bệnh án", "medicalrecord");
@@ -400,7 +407,7 @@ public class Doctor extends Staff {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchPanel.add(searchField);
         searchPanel.add(searchCCCDButton);
-        searchPanel.add(resetButton);
+//        searchPanel.add(resetButton);
 
         JPanel searchNamePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         searchNamePanel.add(searchNameField);
@@ -422,6 +429,7 @@ public class Doctor extends Staff {
         panel.add(scrollableRecordsListPane); // Thêm scrollableRecordsListPane vào panel chính
         panel.add(searchPanel); // Thêm searchPanel vào panel chính
         panel.add(searchNamePanel); // Thêm searchNamePanel vào panel chính
+        panel.add(resetButton);
 
         List<MedicalRecord> records = getRecordData();
         displayRecords(recordListPanel, records); // Gọi hàm với 2 tham số
