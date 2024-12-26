@@ -197,8 +197,7 @@ public class Doctor extends Staff {
         loginFrame.setVisible(true);
     }
 
-    // Method to authenticate the doctor with the database
-    private boolean authenticate(String email, String password) {
+    public boolean authenticate(String email, String password) {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
@@ -209,7 +208,7 @@ public class Doctor extends Staff {
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                isAuthenticated = true; // Login successful if we get a result
+                isAuthenticated = true;
             }
         } catch (SQLException e) {
             e.printStackTrace();

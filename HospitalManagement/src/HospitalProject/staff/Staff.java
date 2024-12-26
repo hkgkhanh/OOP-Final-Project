@@ -1,6 +1,6 @@
 package HospitalProject.staff;
-public class Staff {
-    protected String id;          // ID của admin hoặc doctor
+public class Staff implements Authentication {
+    protected String id;       // ID của admin hoặc doctor
     protected String password; // Mật khẩu
 
     public Staff() {}
@@ -27,7 +27,12 @@ public class Staff {
         this.password = password;
     }
 
-    // Phương thức xác thực (dùng chung nếu cần override)
+	@Override
+	public boolean authenticate(String credential, String password) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
     public boolean authenticate(String password) {
         return this.password.equals(password);
     }

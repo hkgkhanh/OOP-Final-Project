@@ -69,7 +69,7 @@ public class Admin extends Staff {
     }
 
     // Method to authenticate the admin with the database
-    private boolean authenticate(String id, String password) {
+    public boolean authenticate(String id, String password) {
         boolean isAuthenticated = false;
 
         try (Connection conn = DatabaseConnection.connect()) {
