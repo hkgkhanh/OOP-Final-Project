@@ -28,7 +28,8 @@ CREATE TABLE Patient (
     gender ENUM('Male', 'Female') NOT NULL,
     dateOfBirth DATE NOT NULL,
     address VARCHAR(255),
-    phoneNumber VARCHAR(15)
+    phoneNumber VARCHAR(15),
+    insurancePayPercent FLOAT
 );
 
 -- Bảng MedicalRecord
@@ -42,6 +43,8 @@ CREATE TABLE MedicalRecord (
     dateOfVisit DATE NOT NULL,
     followUpDate DATE,
     note TEXT,
+    paid TINYINT(1),
+    subTotalFee FLOAT,
     FOREIGN KEY (cccd) REFERENCES Patient(cccd) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (doctorID) REFERENCES Doctor(doctorID) ON DELETE SET NULL ON UPDATE CASCADE
 );
