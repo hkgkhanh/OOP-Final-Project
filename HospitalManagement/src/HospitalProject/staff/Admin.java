@@ -620,13 +620,28 @@ public class Admin extends Staff {
     }
     private void searchDoctorByName(JPanel doctorListPanel, String name) {
         List<Doctor> doctors = new ArrayList<>();
-        String query = "SELECT * FROM doctor WHERE firstname LIKE ? OR surname LIKE ?";
+        String query = "SELECT * " +
+                       "FROM doctor " +
+                       "WHERE (firstname LIKE ? OR surname LIKE ?) " + 
+                       "OR (firstname LIKE ? AND surname LIKE ?) " +
+                       "OR (surname LIKE ? AND firstname LIKE ?)";
 
         try (Connection conn = DatabaseConnection.connect();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, "%" + name + "%"); // Tìm kiếm tên gần đúng
-            stmt.setString(2, "%" + name + "%");
+            // Tách tên thành các phần
+            String[] nameParts = name.split(" ");
+            String firstName = nameParts[0];
+            String lastName = nameParts[nameParts.length - 1];
+
+            // Gán giá trị cho các tham số
+            stmt.setString(1, "%" + firstName + "%");
+            stmt.setString(2, "%" + lastName + "%");
+            stmt.setString(3, "%" + firstName + "%");
+            stmt.setString(4, "%" + lastName + "%");
+            stmt.setString(5, "%" + lastName + "%");
+            stmt.setString(6, "%" + firstName + "%");
+
             ResultSet rs = stmt.executeQuery();
 
             if (!rs.next()) {
