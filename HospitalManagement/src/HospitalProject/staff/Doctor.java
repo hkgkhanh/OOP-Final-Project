@@ -364,11 +364,11 @@ public class Doctor extends Staff {
             patientPanel.add(dateOfBirthLabel);
             patientPanel.add(phoneNumberLabel);
             
-            patientPanel.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                	displayRecords(recordPanel, patient);
-                }
-            });
+//            patientPanel.addMouseListener(new MouseAdapter() {
+//                public void mouseClicked(MouseEvent e) {
+//                	displayRecords(recordPanel, patient);
+//                }
+//            });
 
             // Add patient panel to main panel
             patientPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -395,7 +395,6 @@ public class Doctor extends Staff {
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
         searchPanel.add(resetButton);
-        panel.add(searchPanel); // Thêm searchPanel vào panel chính
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -411,6 +410,7 @@ public class Doctor extends Staff {
         JScrollPane scrollableRecordsListPane = new JScrollPane(recordListPanel);
         scrollableRecordsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollableRecordsListPane); // Thêm scrollableRecordsListPane vào panel chính
+        panel.add(searchPanel); // Thêm searchPanel vào panel chính
 
         List<MedicalRecord> records = getRecordData();
         displayRecords(recordListPanel, records); // Gọi hàm với 2 tham số
