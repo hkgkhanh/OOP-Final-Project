@@ -238,13 +238,26 @@ public class Admin extends Staff {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
 
-        // Button panel with Add button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(150, 25));
+
+        JButton searchDoctorButton = new JButton("Tìm kiếm");
+        searchDoctorButton.setPreferredSize(new Dimension(100, 25));
+
         JButton addDoctorButton = new JButton("Thêm bác sĩ");
         addDoctorButton.setPreferredSize(new Dimension(150, 25));
-        buttonPanel.add(addDoctorButton);
 
-        // Count label
+        JButton resetButton = new JButton("Trở lại ban đầu");
+        resetButton.setPreferredSize(new Dimension(150, 25));
+
+        buttonPanel.add(searchField);
+        buttonPanel.add(searchDoctorButton);
+        buttonPanel.add(addDoctorButton);
+        buttonPanel.add(resetButton);
+
         JLabel countLabel = new JLabel();
         if (type != null) {
             int count = getCountFromDatabase(type);
@@ -254,21 +267,35 @@ public class Admin extends Staff {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Danh sách bác sĩ
-        JPanel doctorListPanel = new JPanel();
+        final JPanel doctorListPanel = new JPanel();
         doctorListPanel.setLayout(new BoxLayout(doctorListPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollableDoctorsListPane = new JScrollPane(doctorListPanel);
         scrollableDoctorsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollableDoctorsListPane, BorderLayout.CENTER);
 
-        // Hiển thị danh sách bác sĩ ban đầu
-        displayDoctors(doctorListPanel);
+        List<Doctor> doctors = getDoctorData();
+        displayDoctors(doctorListPanel, doctors);
 
-        // Hành động nút thêm bác sĩ
         addDoctorButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 createDoctorDialog(doctorListPanel, countLabel, type);
+            }
+        });
+
+        searchDoctorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String doctorName = searchField.getText();
+                searchDoctorByName(doctorListPanel, doctorName);
+            }
+        });
+
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<Doctor> doctors = getDoctorData();
+                displayDoctors(doctorListPanel, doctors);
             }
         });
 
@@ -535,31 +562,26 @@ public class Admin extends Staff {
         return doctors;
     }
 
-    private void displayDoctors(JPanel panel) {
-        panel.removeAll(); // Xóa toàn bộ nội dung hiện tại của panel
-
-        List<Doctor> doctors = getDoctorData(); // Lấy danh sách bác sĩ từ cơ sở dữ liệu
+    private void displayDoctors(JPanel panel, List<Doctor> doctors) {
+        panel.removeAll();
 
         for (Doctor doctor : doctors) {
-            JPanel doctorPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
-            doctorPanel.setLayout(new BoxLayout(doctorPanel, BoxLayout.Y_AXIS)); // Sử dụng BoxLayout theo chiều dọc
+            JPanel doctorPanel = new JPanel();
+            doctorPanel.setLayout(new BoxLayout(doctorPanel, BoxLayout.Y_AXIS));
 
-            // Thêm các thông tin của bác sĩ vào panel
             JLabel nameLabel = new JLabel("Họ và Tên: " + doctor.getSurname() + " " + doctor.getFirstname());
             JLabel phoneNumberLabel = new JLabel("Số điện thoại: " + doctor.getPhoneNumber());
             JLabel emailLabel = new JLabel("Email: " + doctor.getEmail());
             JLabel facultyLabel = new JLabel("Khoa: " + doctor.getFaculty());
             JLabel joinDateLabel = new JLabel("Ngày tham gia: " + doctor.getJoinDate());
 
-            // Panel chứa nút sửa và xóa
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
 
-            // Gán sự kiện cho nút sửa
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                editDoctor(doctor, panel); // Gọi hàm chỉnh sửa bác sĩ
+                    editDoctor(doctor, panel);
                 }
             });
 
@@ -571,7 +593,8 @@ public class Admin extends Staff {
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (doctor.deleteDoctor(doctor.getId())) {
                             JOptionPane.showMessageDialog(null, "Xóa bác sĩ thành công!");
-                            displayDoctors(panel); // Làm mới danh sách sau khi xóa
+                            List<Doctor> updatedDoctors = getDoctorData();
+                            displayDoctors(panel, updatedDoctors); // Làm mới danh sách sau khi xóa
                         } else {
                             JOptionPane.showMessageDialog(null, "Xóa bác sĩ thất bại!");
                         }
@@ -579,12 +602,9 @@ public class Admin extends Staff {
                 }
             });
 
-
-            // Thêm các nút vào buttonPanel
             buttonPanel.add(editButton);
             buttonPanel.add(deleteButton);
 
-            // Thêm các thành phần vào doctorPanel
             doctorPanel.add(nameLabel);
             doctorPanel.add(phoneNumberLabel);
             doctorPanel.add(emailLabel);
@@ -592,12 +612,45 @@ public class Admin extends Staff {
             doctorPanel.add(joinDateLabel);
             doctorPanel.add(buttonPanel);
 
-            // Thêm doctorPanel vào panel chính
             panel.add(doctorPanel);
         }
 
-        panel.revalidate(); // Làm mới giao diện
-        panel.repaint();    // Vẽ lại giao diện
+        panel.revalidate();
+        panel.repaint();
+    }
+    private void searchDoctorByName(JPanel doctorListPanel, String name) {
+        List<Doctor> doctors = new ArrayList<>();
+        String query = "SELECT * FROM doctor WHERE firstname LIKE ? OR surname LIKE ?";
+
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, "%" + name + "%"); // Tìm kiếm tên gần đúng
+            stmt.setString(2, "%" + name + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(null, "Không tìm thấy bác sĩ có tên: " + name);
+            } else {
+                do {
+                    String id = rs.getString("doctorID");
+                    String password = rs.getString("password");
+                    String firstname = rs.getString("firstname");
+                    String surname = rs.getString("surname");
+                    String faculty = rs.getString("faculty");
+                    String email = rs.getString("email");
+                    String phoneNumber = rs.getString("phoneNumber");
+                    String joindate = rs.getString("joinDate");
+                    doctors.add(new Doctor(id, password, surname, firstname, faculty, phoneNumber, email, joindate));
+                } while (rs.next());
+
+                displayDoctors(doctorListPanel, doctors);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
     }
 
     
@@ -816,7 +869,7 @@ public class Admin extends Staff {
                 if (doctor.updateDoctor()) {
                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
                     editDialog.dispose(); // Đóng dialog sau khi lưu
-                    displayDoctors(panel); // Cập nhật danh sách bác sĩ
+                    displayDoctors(panel, getDoctorData());
                 } else {
                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
                 }
@@ -960,8 +1013,7 @@ public class Admin extends Staff {
         	        createDialog.dispose();
 
         	        // Cập nhật danh sách bác sĩ
-        	        displayDoctors(doctorListPanel);
-
+        	        displayDoctors(doctorListPanel, getDoctorData());
         	        // Cập nhật countLabel
         	        int updatedCount = getCountFromDatabase("doctor");
         	        countLabel.setText("Bác sĩ (" + updatedCount + ")");
