@@ -133,12 +133,12 @@ public class Admin extends Staff {
     private JPanel createManagementPanel_Patient(String title, String type) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
-
+        JPanel buttonPanel = new JPanel(); // Khai báo và khởi tạo buttonPanel
         // Button panel with Add button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS)); // Sắp xếp theo chiều dọc
         
         JTextField searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 25));
+        searchField.setPreferredSize(new Dimension(150, 25)); // Giảm kích thước JTextField
         
         JButton searchPatientButton = new JButton("Tìm kiếm");
         searchPatientButton.setPreferredSize(new Dimension(100, 25));
@@ -146,10 +146,14 @@ public class Admin extends Staff {
         JButton addPatientButton = new JButton("Thêm bệnh nhân");
         addPatientButton.setPreferredSize(new Dimension(150, 25));
         
+        JButton resetButton = new JButton("Trở lại ban đầu");
+        resetButton.setPreferredSize(new Dimension(150, 25));
+        
+        
         buttonPanel.add(searchField);
         buttonPanel.add(searchPatientButton);
         buttonPanel.add(addPatientButton);
-
+        buttonPanel.add(resetButton);
         // Count label
         JLabel countLabel = new JLabel();
         if (type != null) {
@@ -176,7 +180,13 @@ public class Admin extends Staff {
                 createPatientDialog(patientListPanel, countLabel, type);
             }
         });
-        
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<Patient> patients = getPatientData(); // Lấy danh sách bệnh nhân từ database
+                displayPatients(patientListPanel, patients);
+            }
+        });
         searchPatientButton.addActionListener(new ActionListener() { // Thêm ActionListener cho searchButton
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -271,10 +281,25 @@ public class Admin extends Staff {
         panel.setLayout(new BorderLayout(10, 10));
 
         // Button panel with Add button
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JPanel buttonPanel = new JPanel(); // Khai báo và khởi tạo buttonPanel
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS)); // Sắp xếp theo chiều dọc
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(150, 25)); // Giảm kích thước JTextField
+
+        JButton searchRecordButton = new JButton("Tìm kiếm");
+        searchRecordButton.setPreferredSize(new Dimension(100, 25));
+
         JButton addRecordButton = new JButton("Thêm bệnh án");
         addRecordButton.setPreferredSize(new Dimension(150, 25));
+
+        JButton resetButton = new JButton("Trở lại ban đầu");
+        resetButton.setPreferredSize(new Dimension(150, 25));
+
+        buttonPanel.add(searchField);
+        buttonPanel.add(searchRecordButton);
         buttonPanel.add(addRecordButton);
+        buttonPanel.add(resetButton);
 
         // Count label
         JLabel countLabel = new JLabel();
@@ -286,17 +311,16 @@ public class Admin extends Staff {
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Danh sách bệnh nhân
-        JPanel recordListPanel = new JPanel();
+        // Danh sách bệnh án
+        final JPanel recordListPanel = new JPanel(); // Khai báo recordListPanel là final
         recordListPanel.setLayout(new BoxLayout(recordListPanel, BoxLayout.Y_AXIS));
-        JScrollPane scrollablePatientsListPane = new JScrollPane(recordListPanel);
-        scrollablePatientsListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        panel.add(scrollablePatientsListPane, BorderLayout.CENTER);
+        JScrollPane scrollableRecordListPane = new JScrollPane(recordListPanel);
+        scrollableRecordListPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollableRecordListPane, BorderLayout.CENTER);
 
-        // Hiển thị danh sách bệnh nhân ban đầu
-        displayRecords(recordListPanel);
+        List<MedicalRecord> records = getRecordData(); // Lấy danh sách bệnh án từ database
+        displayRecords(recordListPanel, records); // Gọi hàm với 2 tham số
 
-        // Hành động nút thêm bệnh nhân
         addRecordButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -304,9 +328,73 @@ public class Admin extends Staff {
             }
         });
 
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<MedicalRecord> records = getRecordData(); // Lấy danh sách bệnh án từ database
+                displayRecords(recordListPanel, records);
+            }
+        });
+
+        searchRecordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String recordId = searchField.getText();
+                searchRecordByCccd(recordListPanel, recordId);
+            }
+        });
+
         return panel;
     }
+    
+    private void searchRecordByCccd(JPanel recordListPanel, String cccd) {
+        List<MedicalRecord> records = new ArrayList<>(); // Danh sách để lưu kết quả
+        String query = "SELECT * FROM medicalrecord WHERE cccd = ?"; // Câu truy vấn SQL
 
+        try (Connection conn = DatabaseConnection.connect();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, cccd); // Gán giá trị recordId vào câu truy vấn
+            ResultSet rs = stmt.executeQuery(); // Thực thi truy vấn
+
+            // Kiểm tra kết quả
+            if (!rs.next()) {
+                JOptionPane.showMessageDialog(null, "Không tìm thấy bệnh án có mã: " + cccd);
+            } else {
+                // Duyệt qua kết quả và thêm vào danh sách records
+                do {
+                    String id = rs.getString("recordID");
+                    String ma_cccd = rs.getString("cccd");
+                    String doctorID = rs.getString("doctorID");
+                    String diagnosis = rs.getString("diagnosis");
+                    String treatment = rs.getString("treatment");
+                    String prescription = rs.getString("prescription");
+                    String dateOfVisit = rs.getString("dateOfVisit");
+                    int lengthOfHospitalStay = rs.getInt("lengthOfHospitalStay");
+                    String followUpDate = rs.getString("followUpDate");
+                    String note = rs.getString("note");
+                    boolean paid;
+                    if (rs.getString("paid") == null) {
+                        paid = false;
+                    } else {
+                        paid = rs.getString("paid").equals("1") ? true : false;
+                    }
+                    float subTotalFee = 0;
+                    if (rs.getString("subTotalFee") != null) {
+                        subTotalFee = Float.parseFloat(rs.getString("subTotalFee"));
+                    }
+                    records.add(new MedicalRecord(id, ma_cccd, doctorID, diagnosis, treatment, prescription, dateOfVisit, lengthOfHospitalStay, followUpDate, note, paid, subTotalFee));
+                } while (rs.next());
+
+                // Hiển thị danh sách bệnh án tìm được
+                displayRecords(recordListPanel, records);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Database error: " + e.getMessage());
+        }
+    }
 
     // Method to get the count from the database
     private int getCountFromDatabase(String tableName) {
@@ -552,24 +640,25 @@ public class Admin extends Staff {
         return records;
     }
 
-    private void displayRecords(JPanel panel) {
-        panel.removeAll(); // Clear any existing content
+    private void displayRecords(JPanel panel, List<MedicalRecord> records) {
+        panel.removeAll(); // Xóa nội dung hiện tại của panel
 
-        List<MedicalRecord> records = getRecordData();
+        // Duyệt qua danh sách records và hiển thị thông tin
         for (MedicalRecord record : records) {
-        	JPanel recordPanel = new JPanel(); // Tạo một panel riêng cho mỗi bác sĩ
-        	recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
-            
+            JPanel recordPanel = new JPanel();
+            recordPanel.setLayout(new BoxLayout(recordPanel, BoxLayout.Y_AXIS));
+
+            // Add labels for record information
             JLabel cccdLabel = new JLabel("CCCD: " + record.getCccd());
             JLabel doctorIdLabel = new JLabel("Mã bác sĩ: " + record.getDoctorID());
             JLabel diagnosisLabel = new JLabel("Chẩn đoán: " + record.getDiagnosis());
             JLabel dateOfVisitLabel = new JLabel("Ngày khám: " + record.getDateOfVisit());
-            
+
             @SuppressWarnings("deprecation")
-			Locale vnLocale = new Locale("vi", "VN"); 
+            Locale vnLocale = new Locale("vi", "VN");
             NumberFormat vnCurrencyFormat = NumberFormat.getCurrencyInstance(vnLocale);
             JLabel feeLabel = new JLabel("Viện phí: " + (record.getPaid() == false ? vnCurrencyFormat.format(record.calcFee()) : "Đã thanh toán"));
-            
+
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             JButton editButton = new JButton("Sửa");
             JButton deleteButton = new JButton("Xóa");
@@ -577,7 +666,7 @@ public class Admin extends Staff {
             // Set button action listeners
             editButton.addMouseListener(new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
-                    editRecord(record, panel); // Define this method to edit patient data
+                    editRecord(record, panel);
                 }
             });
 
@@ -588,19 +677,19 @@ public class Admin extends Staff {
 
                     if (confirm == JOptionPane.YES_OPTION) {
                         if (record.deleteRecord(record.getId())) {
-                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thành công!");
-                            displayRecords(panel); // Làm mới danh sách sau khi xóa
+                            JOptionPane.showMessageDialog(null, "Xóa bệnh án thành công!");
+                            List<MedicalRecord> records = getRecordData(); // Lấy danh sách bệnh án từ database
+                            displayRecords(panel, records); // Làm mới danh sách sau khi xóa
                         } else {
-                            JOptionPane.showMessageDialog(null, "Xóa bác sĩ thất bại!");
+                            JOptionPane.showMessageDialog(null, "Xóa bệnh án thất bại!");
                         }
                     }
                 }
             });
-            
+
             buttonPanel.add(editButton);
             buttonPanel.add(deleteButton);
 
-            // Add components to the patient panel
             recordPanel.add(cccdLabel);
             recordPanel.add(doctorIdLabel);
             recordPanel.add(diagnosisLabel);
@@ -608,7 +697,6 @@ public class Admin extends Staff {
             recordPanel.add(feeLabel);
             recordPanel.add(buttonPanel);
 
-            // Add patient panel to main panel
             panel.add(recordPanel);
         }
 
@@ -957,7 +1045,8 @@ public class Admin extends Staff {
         	        createDialog.dispose();
 
         	        // Cập nhật danh sách record
-        	        displayRecords(recordListPanel);
+        	        List<MedicalRecord> records = getRecordData(); // Lấy danh sách bệnh án
+        	        displayRecords(recordListPanel, records); // Gọi hàm với 2 tham số
 
         	        // Cập nhật countLabel
         	        int updatedCount = getCountFromDatabase("medicalrecord");
@@ -1039,7 +1128,8 @@ public class Admin extends Staff {
                 if (record.updateRecord()) {
                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
                     editDialog.dispose(); // Đóng dialog sau khi lưu
-                    displayRecords(panel); // Cập nhật danh sách bác sĩ
+                    List<MedicalRecord> records = getRecordData(); // Lấy danh sách bệnh án
+                    displayRecords(panel, records); // Gọi hàm với 2 tham số
                 } else {
                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
                 }
