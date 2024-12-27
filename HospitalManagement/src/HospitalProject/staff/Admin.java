@@ -1049,18 +1049,13 @@ public class Admin extends Staff {
     public void createRecordDialog(JPanel recordListPanel, JLabel countLabel, String type) {
         JDialog createDialog = new JDialog();
         createDialog.setTitle("Thêm bệnh án mới");
-        createDialog.setSize(400, 600);
+        createDialog.setSize(400, 400);
         createDialog.setLayout(new BoxLayout(createDialog.getContentPane(), BoxLayout.Y_AXIS));
 
         JTextField idField = new JTextField();
         JTextField cccdField = new JTextField();
         JTextField doctorIdField = new JTextField();
-        JTextField diagnosisField = new JTextField();
-        JTextField treatmentField = new JTextField();
-        JTextField prescriptionField = new JTextField();
         JTextField dateOfVisitField = new JTextField();
-        JTextField followUpDateField = new JTextField();
-        JTextField noteField = new JTextField();
 
         createDialog.add(new JLabel("Mã bệnh án:"));
         createDialog.add(idField);
@@ -1068,27 +1063,16 @@ public class Admin extends Staff {
         createDialog.add(cccdField);
         createDialog.add(new JLabel("Mã bác sĩ phụ trách:"));
         createDialog.add(doctorIdField);
-        createDialog.add(new JLabel("Chẩn đoán:"));
-        createDialog.add(diagnosisField);
-        createDialog.add(new JLabel("Phác đồ điều trị:"));
-        createDialog.add(treatmentField);
-        createDialog.add(new JLabel("Kê đơn thuốc:"));
-        createDialog.add(prescriptionField);
         createDialog.add(new JLabel("Ngày khám bệnh:"));
         createDialog.add(dateOfVisitField);
-        createDialog.add(new JLabel("Ngày tái khám:"));
-        createDialog.add(followUpDateField);
-        createDialog.add(new JLabel("Ghi chú của bác sĩ:"));
-        createDialog.add(noteField);
         
         JButton saveButton = new JButton("Lưu");
         saveButton.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
         	    // Kiểm tra đầu vào
-        	    if (idField.getText().isEmpty() || cccdField.getText().isEmpty() || doctorIdField.getText().isEmpty() || 
-        	    	diagnosisField.getText().isEmpty() || treatmentField.getText().isEmpty() || prescriptionField.getText().isEmpty() || 
-        	    	dateOfVisitField.getText().isEmpty() || noteField.getText().isEmpty()) {
+        	    if (idField.getText().isEmpty() || cccdField.getText().isEmpty() ||
+        	    		doctorIdField.getText().isEmpty() || dateOfVisitField.getText().isEmpty()) {
         	        JOptionPane.showMessageDialog(null, "Vui lòng nhập đầy đủ thông tin!");
         	        return;
         	    }
@@ -1098,13 +1082,7 @@ public class Admin extends Staff {
         	        idField.getText(),
         	        cccdField.getText(),
         	        doctorIdField.getText(),
-        	        diagnosisField.getText(),
-        	        treatmentField.getText(),
-        	        prescriptionField.getText(),
-        	        dateOfVisitField.getText(),
-        	        0,
-        	        followUpDateField.getText(),
-        	        noteField.getText()
+        	        dateOfVisitField.getText()
         	    );
 
         	    // Gọi phương thức tạo record trong cơ sở dữ liệu
