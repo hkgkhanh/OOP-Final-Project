@@ -24,6 +24,21 @@ public class MedicalRecord {
 	
 	private float subTotalFee;
 	
+	public MedicalRecord(String id, String cccd, String doctorID, String dateOfVisit) {
+//		super();
+		this.id = id;
+		this.cccd = cccd;
+		this.doctorID = doctorID;
+		this.dateOfVisit = dateOfVisit;
+		this.paid = false;
+		this.diagnosis = "";
+		this.treatment = "";
+		this.prescription = "";
+		this.lengthOfHospitalStay = 0;
+		this.followUpDate = null;
+		this.note = "";
+	}
+	
 	public MedicalRecord(String id, String cccd, String doctorID, String diagnosis, String treatment, String prescription,
 			String dateOfVisit, int lengthOfHospitalStay, String followUpDate, String note) {
 //		super();

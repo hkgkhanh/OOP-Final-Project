@@ -4,13 +4,13 @@ USE hospital;
 
 -- Bảng Admin
 CREATE TABLE Admin (
-    adminID INT PRIMARY KEY,
+    adminID VARCHAR(20) PRIMARY KEY,
     password VARCHAR(255) NOT NULL
 );
 
 -- Bảng Doctor
 CREATE TABLE Doctor (
-    doctorID INT PRIMARY KEY,
+    doctorID VARCHAR(20) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
     firstname VARCHAR(50) NOT NULL,
     surname VARCHAR(50) NOT NULL,
@@ -34,9 +34,9 @@ CREATE TABLE Patient (
 
 -- Bảng MedicalRecord
 CREATE TABLE MedicalRecord (
-    recordID INT PRIMARY KEY,
+    recordID VARCHAR(20) PRIMARY KEY,
     cccd VARCHAR(20) NOT NULL,
-    doctorID INT,
+    doctorID VARCHAR(20),
     diagnosis TEXT,
     treatment TEXT,
     prescription TEXT,
@@ -46,5 +46,6 @@ CREATE TABLE MedicalRecord (
     paid TINYINT(1),
     subTotalFee FLOAT,
     FOREIGN KEY (cccd) REFERENCES Patient(cccd) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (doctorID) REFERENCES Doctor(doctorID) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (doctorID) REFERENCES Doctor(doctorID) ON DELETE SET NULL ON UPDATE CASCADE,
+    lengthOfHospitalStay INT
 );

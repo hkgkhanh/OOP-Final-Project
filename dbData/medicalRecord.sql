@@ -1,7 +1,26 @@
 /*
--- Query: select * from medicalrecord
+-- Query: SELECT * FROM medicalRecord
 LIMIT 0, 1000
 
--- Date: 2024-12-25 11:13
+-- Date: 2024-12-28 23:29
 */
-INSERT INTO `` (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`lengthOfHospitalStay`,`paid`,`subTotalFee`) VALUES ('BA0001','001234567891','10','Viêm phổi','Uống thuốc','Thuốc ABCXYZ','2024-12-25','2024-12-31','Không có ghi chú',10,0,1000000);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0001','001234567891','10','Viêm phổi','Uống thuốc','Thuốc ABCXYZ','2024-12-25','2024-12-31','Không có ghi chú',0,1000000,10);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0002','001234567892','13','','','','2024-12-24',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0003','001234567893','2','','','','2024-12-01',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0004','001234567894','3','','','','2024-12-02',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0005','001234567895','4','','','','2024-12-03',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0006','001234567896','5','','','','2024-12-04',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0007','001234567897','6','','','','2024-12-01',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0008','001234567898','7','','','','2024-12-02',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0009','001234567899','8','','','','2024-12-03',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0010','010234567890','9','','','','2024-12-04',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0011','001234567891','13','','','','2024-12-28',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0012','001234567892','2','','','','2024-12-15',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0013','001234567893','3','','','','2024-12-16',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0014','001234567894','4','','','','2024-12-17',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0015','001234567895','5','','','','2024-12-18',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0016','001234567896','6','','','','2024-12-19',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0017','001234567897','7','','','','2024-12-20',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0018','001234567898','8','','','','2024-12-21',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0019','001234567899','9','','','','2024-12-22',NULL,'',NULL,NULL,0);
+INSERT INTO medicalrecord (`recordID`,`cccd`,`doctorID`,`diagnosis`,`treatment`,`prescription`,`dateOfVisit`,`followUpDate`,`note`,`paid`,`subTotalFee`,`lengthOfHospitalStay`) VALUES ('BA0020','010234567890','10','','','','2024-12-23',NULL,'',NULL,NULL,0);
